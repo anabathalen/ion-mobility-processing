@@ -21,7 +21,7 @@ def multi_gaussian(x, *params):
 
 if uploaded_file:
     try:
-        # Read the file
+        # Read the uploaded CSV file
         df = pd.read_csv(uploaded_file)
         st.write("Preview of the uploaded data:")
         st.dataframe(df.head())  # Show the first few rows of the uploaded data
@@ -31,9 +31,13 @@ if uploaded_file:
             x = df['x'].values
             y = df['y'].values
 
-            st.write(f"Total points: {len(x)}")  # Debugging line to show the number of points
+            # Show some debug information
+            st.write(f"Total data points: {len(x)}")
 
-            # Gaussian fitting
+            # Create a progress bar to show live updates during fitting
+            progress_bar = st.progress(0)
+            
+            # Gaussian fitting options
             n_gaussians = st.slider("Number of Gaussians to fit", 1, 5, 3)
 
             # Initial guess: equally spaced means, fixed width, guess amps
@@ -71,9 +75,14 @@ if uploaded_file:
                 st.write(f"  Amplitude = {popt[i*3]:.3f}")
                 st.write(f"  Center = {popt[i*3+1]:.3f}")
                 st.write(f"  Width = {popt[i*3+2]:.3f}")
+
+            # Update the progress bar to indicate fitting is complete
+            progress_bar.progress(100)
+
         else:
             st.error("The uploaded CSV must contain 'x' and 'y' columns.")
     
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
 
