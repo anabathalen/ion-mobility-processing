@@ -52,14 +52,14 @@ def upload_and_plot():
                 return result
 
             # Customization options for the plot
-            dpi = st.slider("Select DPI", min_value=50, max_value=300, value=150)
-            font_size = st.slider("Font Size", min_value=8, max_value=20, value=12)
-            fig_size = st.slider("Figure Size (inches)", min_value=5, max_value=10, value=8)
+            dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
+            font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
+            fig_size = st.slider("Figure Size (inches)", min_value=2, max_value=15, value=4)
             x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
             color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
 
             # Line width for the data plot
-            line_width = st.slider("Line Width for Data Plot", min_value=1, max_value=5, value=2)
+            line_width = st.slider("Line Width for Data Plot", min_value=0.1, max_value=5, value=1)
 
             # Fit the Gaussians and plot the result
             fig, ax = plt.subplots()
@@ -101,7 +101,7 @@ def upload_and_plot():
                     y_fit = gaussian(x_full, amp, mean, stddev)
 
                     # Plot the fitted Gaussian across the full range with a transparent fill
-                    ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'Gaussian {i+1} (mean = {mean:.2f})')
+                    ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'mean = {mean:.2f}')
                     
                 except Exception as e:
                     continue  # Skip this peak if fitting fails
