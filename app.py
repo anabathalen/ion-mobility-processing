@@ -1,12 +1,23 @@
 import streamlit as st
 
-# Streamlit UI
-st.title("Simple Streamlit App")
+# Sidebar with navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Fit Gaussians to Data", "Calibrate"])
 
-# Create a checkbox
-user_input = st.checkbox("Try me")
+# Home Page
+if page == "Home":
+    st.title("👩🏻‍🔬 Barran Group IM-MS Processing Tools")
+    st.subheader("←←← Navigate to the tool you need from the sidebar.")
 
-# Check if the checkbox is ticked
-if user_input:
-    st.write("Working")
+# Upload CSV Page (handles the file upload)
+elif page == "Fit Gaussians to Data":
+    st.title("Fit Gaussians to Data")
+    
+    import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
+    upload_plot.upload_and_plot()
 
+# Upload CSV Page (handles the file upload)
+elif page == "Calibrate":
+    st.title("Calibrate")
+    
+    import calibrate  # This will bring in the CSV upload functionality from upload_plot.py
