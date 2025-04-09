@@ -6,7 +6,7 @@ from scipy.optimize import curve_fit
 import seaborn as sns
 import io
 
-st.subheader("This page is for fitting gaussians to x, y data - if you have already calibrated/summed/done whatever else you planned to do to your data, and you just want to fit gaussians to the major peaks, this tool is for you.")
+st.write("This page is for fitting gaussians to x, y data - if you have already calibrated/summed/done whatever else you planned to do to your data, and you just want to fit gaussians to the major peaks, this tool is for you.")
 
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
