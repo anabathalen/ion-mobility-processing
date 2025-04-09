@@ -1,60 +1,43 @@
 import streamlit as st
-import zipfile
-import os
-import tempfile
 
-# Function to handle the ZIP file upload and extract folder names
-def extract_zip_and_list_folders(uploaded_zip):
-    try:
-        # Create a temporary directory to extract the ZIP contents
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            st.write(f"Temporary directory created: {tmpdirname}")  # Debug log
+# Step 1: Ask for the first calibrant name
+st.title("Calibrant Charge State File Upload")
+calibrant_name = st.text_input("Enter the name of the first calibrant:")
 
-            # Extract the ZIP file to the temporary directory
-            with zipfile.ZipFile(uploaded_zip, 'r') as zip_ref:
-                st.write(f"Extracting ZIP file: {uploaded_zip.name}")  # Debug log
-                zip_ref.extractall(tmpdirname)
-                st.write("Extraction completed!")  # Debug log
-            
-            # List the folder names inside the extracted ZIP file
-            folder_names = [folder for folder in os.listdir(tmpdirname) if os.path.isdir(os.path.join(tmpdirname, folder))]
-            st.write(f"Folder names found: {folder_names}")  # Debug log
+# If a calibrant name is provided, ask to upload the charge state files
+if calibrant_name:
+    st.write(f"Processing files for calibrant: {calibrant_name}")
+    
+    # Step 2: File uploader for multiple files (drag-and-drop)
+    charge_state_files = st.file_uploader(
+        "Upload Charge State Files for this calibrant",
+        type=["txt", "csv", "dat"],  # Assuming charge state files are of these types
+        accept_multiple_files=True
+    )
 
-            if folder_names:
-                return folder_names
-            else:
-                return "No folders were found inside the ZIP file."
-    except Exception as e:
-        return f"Error during extraction: {e}"
+    if charge_state_files:
+        # Step 3: Process the uploaded charge state files
+        st.write(f"Processing {len(charge_state_files)} files...")
 
-# Streamlit interface
-st.title("ZIP File Folder Extractor")
-st.write("Upload a ZIP file, and it will show the names of any folders inside it.")
+        # (Optional) Here you would include your fitting logic:
+        # For now, we are just displaying the names of the uploaded files
+        for uploaded_file in charge_state_files:
+            st.write(f"- {uploaded_file.name}")
+        
+        # After fitting (if applicable), we could show a success message
+        st.success(f"Successfully processed the charge state files for {calibrant_name}!")
 
-# File uploader widget
-uploaded_zip = st.file_uploader("Upload ZIP File", type=["zip"])
+        # Step 4: Ask if you want to upload for another calibrant
+        next_calibrant = st.radio("Do you want to upload files for another calibrant?", ["Yes", "No"])
 
-if uploaded_zip:
-    st.write(f"Uploaded file: {uploaded_zip.name}")  # Debug log
-    st.write(f"File size: {uploaded_zip.size / 1024:.2f} KB")  # Debug log
-
-    # Step 1: Extract and process the ZIP file
-    folder_names = extract_zip_and_list_folders(uploaded_zip)
-
-    # Step 2: Check if folders were found or if there was an error
-    if isinstance(folder_names, list):  # If folder names were successfully retrieved
-        if folder_names:
-            st.write("### Found the following folders inside the ZIP file:")
-            for folder in folder_names:
-                st.write(f"- {folder}")
+        if next_calibrant == "Yes":
+            st.text_input("Enter the name of the next calibrant:")
         else:
-            st.write("No folders were found inside the ZIP file.")
-    else:  # If there was an error during extraction
-        st.write(folder_names)  # Display the error message
+            st.write("All files have been processed.")
+    else:
+        st.write("Please upload the charge state files for this calibrant.")
 else:
-    st.write("Please upload a ZIP file to get started.")
-
-
+    st.write("Please enter a calibrant name to start.")
 
 
 
