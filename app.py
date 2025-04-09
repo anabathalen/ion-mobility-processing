@@ -1,15 +1,21 @@
 import streamlit as st
 
-st.set_page_config(page_title="Lab Data Tool", page_icon="🧪", layout="centered")
+# Set page config
+st.set_page_config(page_title="Ion Mobility Data Processing", page_icon="🧪", layout="wide")
 
-st.title("Welcome to the Lab Data App 👋")
+# Sidebar navigation
+page = st.sidebar.selectbox("Navigate to", ["Home", "Plot", "Upload Data", "Gaussian Fit"])
 
-st.markdown("""
-This app helps you:
-- 📊 Plot data
-- 📁 Upload your CSV files
-- 📈 View processed results
-
-Use the sidebar to navigate through the app.
-""")
-
+# Home page content
+if page == "Home":
+    st.title("Welcome to the Ion Mobility Processing Tool")
+    st.markdown("""
+    Use the sidebar to navigate between:
+    - 📊 Plot
+    - 📁 Upload Data
+    - 🌋 Gaussian Fitting
+    """)
+  
+elif page == "Gaussian Fit":
+    st.title("Gaussian Fitting Tool")
+    # Your Gaussian fitting code (from before)
