@@ -97,17 +97,22 @@ def upload_and_plot():
 
                     # Fit the Gaussians for this region only
                     try:
-                        popt, _ = curve_fit(multi_gaussian, x_local, y_local, p0=local_guess)
+                        # Debugging the fitting process
+                        st.write(f"  Initial guess: {local_guess}")
+                        popt, pcov = curve_fit(gaussian, x_local, y_local, p0=local_guess)
                         st.write(f"  Fitting successful for peak {peak:.2f}!")
+                        
+                        # Extract parameters from the fitting result
+                        amp, mean, stddev = popt
+                        st.write(f"  Fitted parameters: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
                     except Exception as e:
                         st.error(f"Fitting failed for peak {peak:.2f}: {e}")
                         continue  # Skip this peak if fitting fails
 
                     # Plot the fitted Gaussian if fitting was successful
-                    for i in range(num_gaussians):
-                        amp, mean, stddev = popt[3*i:3*(i+1)]
-                        gaussian_fit = gaussian(x_local, amp, mean, stddev)
-                        ax.plot(x_local, gaussian_fit, label=f'Gaussian {i+1} around x={peak:.2f}', linestyle='--')
+                    if 'popt' in locals():
+                        gaussian_fit = gaussian(x_local, *popt)
+                        ax.plot(x_local, gaussian_fit, label=f'Gaussian for peak {peak:.2f}', linestyle='--')
 
                 ax.set_title("Gaussian Fit to Data (with Local Regions)")
                 ax.set_xlabel("X")
@@ -121,14 +126,14 @@ def upload_and_plot():
                     st.write(f"Peak {i+1} (initial guess: {peak}):")
                     # Only access popt if the fitting was successful
                     if 'popt' in locals():
-                        for j in range(num_gaussians):
-                            amp, mean, stddev = popt[3*j:3*(j+1)]
-                            st.write(f"  Gaussian {j+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
+                        amp, mean, stddev = popt
+                        st.write(f"  Gaussian {i+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
                     else:
                         st.write(f"  Gaussian fitting failed for peak {peak:.2f}")
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
 
 
 
