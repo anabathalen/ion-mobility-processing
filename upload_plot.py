@@ -183,3 +183,4 @@ def upload_and_plot():
                         file_name="customized_gaussian_plot.png",
                         mime="image/png"
                     )
+upload_and_plot()
