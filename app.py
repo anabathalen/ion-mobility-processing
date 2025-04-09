@@ -6,13 +6,12 @@ page = st.sidebar.radio("Go to", ["Home", "Upload CSV"])
 
 # Home Page
 if page == "Home":
-    st.title("Welcome to the Home Page!")
-    st.write("This is your main page. You can navigate to the 'Plot' or 'Upload CSV' page from the sidebar.")
+    st.title("IM-MS Processing Tools")
+    st.write("<-- Use the sidebar to navigate to the tool you need.")
 
 # Upload CSV Page (handles the file upload)
-elif page == "Upload CSV":
-    st.title("Upload CSV and Plot")
-    st.write("Upload your x, y CSV file to generate a plot.")
+elif page == "Fit Gaussians to Data":
+    st.title("Fit Gaussians to Data")
     
     import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
     upload_plot.upload_and_plot()
