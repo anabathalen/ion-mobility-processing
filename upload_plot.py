@@ -76,6 +76,9 @@ def upload_and_plot():
                 # Loop through each peak guess to perform the fitting and plot the results
                 summed_y_fit = np.zeros_like(x_data)  # Initialize the summed Gaussian
 
+                # Create a high resolution x-axis (full range) for the fit
+                x_full = np.linspace(min(x_data), max(x_data), 1000)
+
                 for i, peak in enumerate(peaks):
                     # Define the local region from peak - 10 to peak + 10
                     x_range_min = peak - peak*0.05
@@ -101,8 +104,7 @@ def upload_and_plot():
                         # Extract parameters from the fitting result
                         amp, mean, stddev = popt
 
-                        # Generate x values across the full data range to plot the Gaussian
-                        x_full = np.linspace(min(x_data), max(x_data), 1000)
+                        # Generate y values across the full x_full range to plot the Gaussian
                         y_fit = gaussian(x_full, amp, mean, stddev)
                         summed_y_fit += y_fit  # Sum the Gaussian fits
 
@@ -141,3 +143,4 @@ def upload_and_plot():
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
