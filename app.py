@@ -6,8 +6,8 @@ page = st.sidebar.radio("Go to", ["Home", "Upload CSV"])
 
 # Home Page
 if page == "Home":
-    st.title("Welcome to the Home Page!")
-    st.write("This is your main page. You can navigate to the 'Plot' or 'Upload CSV' page from the sidebar.")
+    st.title("Barran Group IM-MS Processing Tools")
+    st.write("Navigate to the tool you need from the sidebar.")
 
 # Upload CSV Page (handles the file upload)
 elif page == "Upload CSV":
