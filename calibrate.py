@@ -1,18 +1,27 @@
 import streamlit as st
 
-# Define the function to show the checkbox
-def show_checkbox():
+# Function to handle checkbox logic
+def handle_checkbox():
     # Create a checkbox and store its state
-    if st.checkbox("Try me"):
+    checkbox_state = st.checkbox("Try me")
+    
+    # Based on checkbox state, show the appropriate message
+    if checkbox_state:
         st.write("Working")
     else:
         st.write("Please try me!")
 
-# Main code execution
-st.title("Simple Streamlit App")
+# Main app code
+def main():
+    st.title("Simple Streamlit App")
 
-# Call the function to show the checkbox
-show_checkbox()
+    # Call the checkbox handler function
+    handle_checkbox()
+
+# Run the app
+if __name__ == "__main__":
+    main()
+
 
 
 
