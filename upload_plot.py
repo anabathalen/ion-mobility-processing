@@ -134,4 +134,58 @@ def upload_and_plot():
                     mime="image/png"
                 )
 
+                # Customization Section
+                if st.button("Customize Plot"):
+                    # Let the user customize their plot
+                    dpi = st.slider("Select DPI", min_value=50, max_value=300, value=150)
+                    font_size = st.slider("Font Size", min_value=8, max_value=20, value=12)
+                    fig_size = st.slider("Figure Size (inches)", min_value=5, max_value=10, value=8)
+                    x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
+                    color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
 
+                    # Apply user customizations to the plot
+                    fig, ax = plt.subplots()
+                    ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Data as line
+
+                    # Get the selected color palette
+                    colors = sns.color_palette(color_palette, n_colors=num_gaussians)
+
+                    # Plot the Gaussian fits with the new color palette
+                    for i, peak in enumerate(peaks):
+                        x_range_min = peak - peak*0.05
+                        x_range_max = peak + peak*0.05
+                        mask = (x_data >= x_range_min) & (x_data <= x_range_max)
+                        x_local = x_data[mask]
+                        y_local = y_data[mask]
+
+                        # Fit the Gaussians and plot them
+                        local_guess = [max(y_local), peak, 1]
+                        popt, _ = curve_fit(gaussian, x_local, y_local, p0=local_guess)
+                        amp, mean, stddev = popt
+                        y_fit = gaussian(x_full, amp, mean, stddev)
+                        ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'Gaussian {i+1} (mean = {mean:.2f})')
+
+                    # Update plot aesthetics based on user settings
+                    ax.set_xlabel(x_label, fontsize=font_size)
+                    ax.tick_params(axis='y', labelleft=False, left=False, right=False)
+                    ax.set_ylabel("", fontsize=font_size)
+                    ax.legend(fontsize=font_size)
+
+                    # Adjust figure size
+                    fig.set_size_inches(fig_size, fig_size)
+                    plt.rcParams.update({'font.size': font_size})  # Update font size globally
+
+                    # Show the customized plot to the user
+                    st.pyplot(fig)
+
+                    # Allow user to download the customized plot
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format="png", dpi=dpi)
+                    buf.seek(0)
+
+                    st.download_button(
+                        label="Download Customized Plot as PNG",
+                        data=buf,
+                        file_name="customized_gaussian_plot.png",
+                        mime="image/png"
+                    )
