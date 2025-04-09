@@ -4,15 +4,13 @@ import streamlit as st
 st.set_page_config(page_title="Ion Mobility Data Processing", page_icon="🧪", layout="wide")
 
 # Sidebar navigation
-page = st.sidebar.selectbox("Navigate to", ["Home", "Plot", "Upload Data", "Gaussian Fit"])
+page = st.sidebar.selectbox("Navigate to", ["Home", "Gaussian Fit"])
 
 # Home page content
 if page == "Home":
     st.title("Welcome to the Ion Mobility Processing Tool")
     st.markdown("""
     Use the sidebar to navigate between:
-    - 📊 Plot
-    - 📁 Upload Data
     - 🌋 Gaussian Fitting
     """)
   
