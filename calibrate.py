@@ -54,34 +54,61 @@ def process_uploaded_files(uploaded_zip):
 
         protein_results = []
         protein_plots = []
-        # Loop through the extracted files and process them
-        for folder_name in os.listdir(tmpdirname):
-            folder_path = os.path.join(tmpdirname, folder_name)
-            if os.path.isdir(folder_path):
-                for filename in os.listdir(folder_path):
-                    if filename.endswith('.txt') and filename[0].isdigit():
-                        file_path = os.path.join(folder_path, filename)
+        folder_names = [folder for folder in os.listdir(tmpdirname) if os.path.isdir(os.path.join(tmpdirname, folder))]
 
-                        # Load the data from the file
-                        data = np.loadtxt(file_path)
-                        drift_time = data[:, 0]
-                        intensity = data[:, 1]
+        return folder_names, tmpdirname
 
-                        # Perform Gaussian fit
-                        params, r2, fitted_values = fit_gaussian_with_retries(drift_time, intensity)
+# Streamlit interface
+st.write("### IMS Calibration Reference File Generator")
+st.write("""
+This tool is for generating IMS calibration reference files to calibrate your data. 
+Upload a ZIP file containing folders with your text files. Each folder should be named with the protein name, 
+and each file should contain a 'charge state'. The files should be in the format 'chargestate.txt'.
+""")
 
-                        # Store results and plots
-                        if params is not None:
-                            amp, apex, stddev = params
-                            protein_results.append([folder_name, filename, apex, r2, amp, stddev])
-                            protein_plots.append((drift_time, intensity, fitted_values, filename, apex, r2))
+# File uploader widget
+uploaded_zip = st.file_uploader("Upload ZIP File", type=["zip"])
 
-        # Display the results and plots
+if uploaded_zip:
+    # Show the uploaded ZIP file name
+    st.write(f"Uploaded file: {uploaded_zip.name}")
+
+    # Get the folder names after extraction
+    folder_names, tmpdirname = process_uploaded_files(uploaded_zip)
+    
+    for protein_name in folder_names:
+        st.write(f"### Processing Folder: {protein_name}")
+
+        protein_results = []
+        protein_plots = []
+
+        folder_path = os.path.join(tmpdirname, protein_name)
+        
+        for filename in os.listdir(folder_path):
+            if filename.endswith('.txt') and filename[0].isdigit():
+                file_path = os.path.join(folder_path, filename)
+
+                # Load the data from the file
+                data = np.loadtxt(file_path)
+                drift_time = data[:, 0]
+                intensity = data[:, 1]
+
+                # Perform Gaussian fit
+                params, r2, fitted_values = fit_gaussian_with_retries(drift_time, intensity)
+
+                # Store results and plots
+                if params is not None:
+                    amp, apex, stddev = params
+                    protein_results.append([protein_name, filename, apex, r2, amp, stddev])
+                    protein_plots.append((drift_time, intensity, fitted_values, filename, apex, r2))
+
+        # Display the results and plots for this protein folder
         if protein_plots:
             n_plots = len(protein_plots)
             n_cols = 3
             n_rows = (n_plots + n_cols - 1) // n_cols
 
+            # Display all the plots for the current protein folder
             plt.figure(figsize=(12, 4 * n_rows))
             for i, (drift_time, intensity, fitted_values, filename, apex, r2) in enumerate(protein_plots):
                 plt.subplot(n_rows, n_cols, i + 1)
@@ -96,39 +123,23 @@ def process_uploaded_files(uploaded_zip):
             plt.tight_layout()
             st.pyplot()
 
-            # Show a table of results
+            # Show a table of results for the current protein folder
             results_df = pd.DataFrame(protein_results, columns=['Protein', 'File', 'Apex Drift Time', 'R²', 'Amplitude', 'Standard Deviation'])
             st.write(results_df)
 
-        return protein_results
+            # Acceptance/Decline for each file
+            for result in protein_results:
+                protein, filename, apex, r2, amp, stddev = result
+                st.write(f"### {filename} - {protein}")
+                st.write(f"Apex: {apex:.2f}, R²: {r2:.3f}")
+                st.write(f"Amplitude: {amp:.2f}, Standard Deviation: {stddev:.2f}")
+                
+                # Add Accept/Decline buttons for each file
+                accept = st.button(f"Accept Fit for {filename}")
+                decline = st.button(f"Decline Fit for {filename}")
+                
+                if accept:
+                    st.write(f"You accepted the fit for {filename}")
+                if decline:
+                    st.write(f"You declined the fit for {filename}")
 
-# Streamlit interface
-st.write("### IMS Calibration Reference File Generator")
-st.write("""
-This tool is for generating IMS calibration reference files to calibrate your data. 
-Upload a ZIP file containing folders with your text files. Each folder should be named with the protein name, 
-and each file should contain a 'charge state'. The files should be in the format 'chargestate.txt'.
-""")
-
-# File uploader widget
-uploaded_zip = st.file_uploader("Upload ZIP File", type=["zip"])
-
-if uploaded_zip:
-    st.write("Processing the uploaded files...")
-    results = process_uploaded_files(uploaded_zip)
-
-    # Acceptance/Decline for each file
-    for result in results:
-        protein, filename, apex, r2, amp, stddev = result
-        st.write(f"### {filename} - {protein}")
-        st.write(f"Apex: {apex:.2f}, R²: {r2:.3f}")
-        st.write(f"Amplitude: {amp:.2f}, Standard Deviation: {stddev:.2f}")
-        
-        # Add Accept/Decline buttons
-        accept = st.button(f"Accept Fit for {filename}")
-        decline = st.button(f"Decline Fit for {filename}")
-        
-        if accept:
-            st.write(f"You accepted the fit for {filename}")
-        if decline:
-            st.write(f"You declined the fit for {filename}")
