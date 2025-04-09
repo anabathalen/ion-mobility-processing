@@ -12,16 +12,10 @@ def handle_checkbox():
         st.write("Please try me!")
 
 # Main app code
-def main():
-    st.title("Simple Streamlit App")
+st.title("Simple Streamlit App")
 
-    # Call the checkbox handler function
-    handle_checkbox()
-
-# Run the app
-if __name__ == "__main__":
-    main()
-
+# Call the checkbox handler function directly
+handle_checkbox()
 
 
 
