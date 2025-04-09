@@ -74,6 +74,9 @@ def upload_and_plot():
                 peak_guess = st.number_input(f"Enter the initial guess for the {i+1}th peak (mean of Gaussian {i+1}):", value=float(df['x'].median()))
                 peaks.append(peak_guess)
 
+            # Option to fix the peak width for subsequent Gaussians
+            fix_peak_width = st.checkbox("Fix peak width for subsequent Gaussians (each subsequent Gaussian's width is no more than 10% larger than the previous one)")
+
             # Once the user has entered all the Gaussian centers, allow the user to customize the plot
             with st.expander("Plot Customization Options", expanded=True):
                 # First, figure-related customization (size, DPI)
@@ -100,6 +103,12 @@ def upload_and_plot():
                     for peak in peaks:
                         # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
                         initial_guess += [max(y_data), peak, 100]
+
+                    # If the user wants to fix the peak width, apply the 10% rule to all subsequent Gaussians
+                    if fix_peak_width and len(initial_guess) >= 6:
+                        # Ensure each subsequent Gaussian's width is no more than 10% larger than the previous one
+                        for i in range(1, len(initial_guess) // 3):
+                            initial_guess[3*i + 2] = initial_guess[3*(i-1) + 2] * 1.10  # Fix stddev width
 
                     # Fitting function to include only a local region (x-10 to x+10)
                     def multi_gaussian(x, *params):
@@ -183,7 +192,3 @@ def upload_and_plot():
                         file_name="customized_gaussian_plot.png",
                         mime="image/png"
                     )
-
-
-
-
