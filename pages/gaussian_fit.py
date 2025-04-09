@@ -9,6 +9,8 @@ st.title("🌋 Gaussian Fitting Tool")
 # Step 1: Upload CSV file
 uploaded_file = st.file_uploader("Upload CSV file with 'x' and 'y' columns", type="csv")
 
+st.write(df.head())  # Print the first few rows to check
+
 # Helper: sum of N gaussians
 def multi_gaussian(x, *params):
     y = np.zeros_like(x)
