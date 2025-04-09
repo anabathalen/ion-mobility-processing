@@ -12,11 +12,12 @@ st.write("This page is for fitting gaussians to x, y data. If you have already c
 def gaussian(x, amp, mean, stddev):
     return amp * np.exp(-(x - mean)**2 / (2 * stddev**2))
 
-# Find major local maxima (points where the y values go down on both sides 5 times)
-def find_major_local_maxima(x, y, window_size=5):
+# Find major local maxima (points where the y values go down on both sides 5 times) and intensity >= 0.1 * max intensity
+def find_major_local_maxima(x, y, window_size=5, intensity_threshold=0.1):
     maxima_indices = []
+    max_intensity = max(y)
     for i in range(window_size, len(y) - window_size):
-        if y[i] == max(y[i - window_size:i + window_size + 1]):
+        if y[i] == max(y[i - window_size:i + window_size + 1]) and y[i] >= intensity_threshold * max_intensity:
             maxima_indices.append(i)
     return maxima_indices
 
@@ -47,7 +48,16 @@ def upload_and_plot():
 
             # Annotate the major local maxima with x values
             for i, x_val in enumerate(maxima_x):
-                ax.annotate(f'{x_val:.2f}', (x_val, maxima_y.iloc[i]), textcoords="offset points", xytext=(0, 10), ha='center')
+                # Adjust the annotation position to ensure it stays within the plot
+                y_val = maxima_y.iloc[i]
+                offset = 10
+                # Ensure the label doesn't go outside the plot boundaries
+                if x_val < min(df['x']) + 0.1 * (max(df['x']) - min(df['x'])):
+                    offset = -10  # Move the label slightly to the right if too close to left boundary
+                elif x_val > max(df['x']) - 0.1 * (max(df['x']) - min(df['x'])):
+                    offset = -10  # Move the label slightly to the left if too close to right boundary
+                
+                ax.annotate(f'{x_val:.2f}', (x_val, y_val), textcoords="offset points", xytext=(0, offset), ha='center')
 
             ax.set_xlabel("Drift Time (Bins)")
             ax.set_ylabel("Intensity")
@@ -173,6 +183,7 @@ def upload_and_plot():
                         file_name="customized_gaussian_plot.png",
                         mime="image/png"
                     )
+
 
 
 
