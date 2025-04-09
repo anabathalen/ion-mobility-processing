@@ -17,3 +17,4 @@ if page == "Home":
 elif page == "Gaussian Fit":
     st.title("Gaussian Fitting Tool")
     # Your Gaussian fitting code (from before)
+    import pages.1_Gaussian_Fit  # You can just import the page's code
