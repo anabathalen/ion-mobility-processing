@@ -76,8 +76,8 @@ def upload_and_plot():
                 # Loop through each peak guess to perform the fitting and plot the results
                 for i, peak in enumerate(peaks):
                     # Define the local region from peak - 10 to peak + 10
-                    x_range_min = peak - 10
-                    x_range_max = peak + 10
+                    x_range_min = peak - 5
+                    x_range_max = peak + 5
 
                     # Get the subset of data within the x-range [peak-10, peak+10]
                     mask = (x_data >= x_range_min) & (x_data <= x_range_max)
