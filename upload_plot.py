@@ -6,13 +6,15 @@ from scipy.optimize import curve_fit
 import seaborn as sns
 import io
 
+st.subheading("This page is for fitting gaussians to x, y data - if you have already calibrated/summed/done whatever else you planned to do to your data, and you just want to fit gaussians to the major peaks, this tool is for you.")
+
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
     return amp * np.exp(-(x - mean)**2 / (2 * stddev**2))
 
 def upload_and_plot():
     # Allow the user to upload a CSV file
-    uploaded_file = st.file_uploader("Upload your x, y CSV file", type="csv")
+    uploaded_file = st.file_uploader("Upload your csv file here:", type="csv")
     
     if uploaded_file is not None:
         # Read the CSV into a pandas DataFrame
