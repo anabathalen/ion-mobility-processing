@@ -2,7 +2,7 @@ import streamlit as st
 
 # Sidebar with navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Plot", "Upload CSV"])
+page = st.sidebar.radio("Go to", ["Home", "Upload CSV"])
 
 # Home Page
 if page == "Home":
