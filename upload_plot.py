@@ -6,11 +6,19 @@ from scipy.optimize import curve_fit
 import seaborn as sns
 import io
 
-st.write("This page is for fitting gaussians to x, y data - if you have already calibrated/summed/done whatever else you planned to do to your data, and you just want to fit gaussians to the major peaks, this tool is for you.")
+st.write("This page is for fitting gaussians to x, y data. If you have already calibrated/summed/done whatever else you planned to do to your data, and you just want to fit gaussians to the major peaks, this tool is for you.")
 
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
     return amp * np.exp(-(x - mean)**2 / (2 * stddev**2))
+
+# Find major local maxima (points where the y values go down on both sides 5 times)
+def find_major_local_maxima(x, y, window_size=5):
+    maxima_indices = []
+    for i in range(window_size, len(y) - window_size):
+        if y[i] == max(y[i - window_size:i + window_size + 1]):
+            maxima_indices.append(i)
+    return maxima_indices
 
 def upload_and_plot():
     # Allow the user to upload a CSV file
@@ -27,9 +35,23 @@ def upload_and_plot():
         
         # Check if the DataFrame contains 'x' and 'y' columns
         if 'x' in df.columns and 'y' in df.columns:
+            # Find and label major local maxima
+            maxima_indices = find_major_local_maxima(df['x'], df['y'])
+            maxima_x = df['x'].iloc[maxima_indices]
+            maxima_y = df['y'].iloc[maxima_indices]
+
+            # Plot the raw data with labeled major maxima
+            fig, ax = plt.subplots()
+            ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0, linewidth=1)  # Data as line
+            ax.scatter(maxima_x, maxima_y, color='red', label='Major Local Maxima', zorder=5)
+            ax.set_xlabel("Drift Time (Bins)")
+            ax.set_ylabel("Intensity")
+            ax.legend()
+            st.pyplot(fig)
+
             # Ask the user how many Gaussians they want to fit
-            st.write("This tool is for fitting gaussians to the major peaks in your data. This is acheived by fitting each peak individually using only the data surrounding peak maxima (+/- 5%). This means that it is not well suited to identifying small shoulders or very poorly resolved peaks. To use this tool, count the number of MAJOR peaks in the distribution.")
-            num_gaussians = st.number_input("How many gaussians would you like to fit to the data?", min_value=1, max_value=10, value=None)
+            st.write("Now that the major maxima have been identified, please input the number of Gaussian peaks and their positions.")
+            num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=10, value=None)
 
             if num_gaussians is not None:
                 # Ask for initial guesses for the Gaussian means (peak x-values)
@@ -38,7 +60,22 @@ def upload_and_plot():
                     peak_guess = st.number_input(f"Enter the initial guess for the {i+1}th peak (mean of Gaussian {i+1}):", value=float(df['x'].median()))
                     peaks.append(peak_guess)
 
-                # Create the x values for fitting
+                # Once all input is filled in, allow the user to customize the plot
+                with st.expander("Plot Customization Options", expanded=True):
+                    # First, figure-related customization (size, DPI)
+                    st.header("Figure Customization")
+                    fig_width = st.slider("Figure Width (inches)", min_value=2, max_value=15, value=8)
+                    fig_height = st.slider("Figure Height (inches)", min_value=2, max_value=15, value=6)
+                    dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
+
+                    # Then, aesthetic-related customization (font, color, etc.)
+                    st.header("Aesthetic Customization")
+                    font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
+                    x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
+                    color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
+                    line_width = st.slider("Line Width for Data Plot", min_value=0, max_value=5, value=1)
+
+                # Prepare for Gaussian fitting
                 x_data = df['x']
                 y_data = df['y']
 
@@ -56,22 +93,7 @@ def upload_and_plot():
                         result += gaussian(x, amp, mean, stddev)
                     return result
 
-                # Re-render the customization options after Gaussian parameters are input
-                with st.expander("Plot Customization Options", expanded=True):
-                    # First, figure-related customization (size, DPI)
-                    st.header("Figure Customization")
-                    fig_width = st.slider("Figure Width (inches)", min_value=2, max_value=15, value=8)
-                    fig_height = st.slider("Figure Height (inches)", min_value=2, max_value=15, value=6)
-                    dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
-
-                    # Then, aesthetic-related customization (font, color, etc.)
-                    st.header("Aesthetic Customization")
-                    font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
-                    x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
-                    color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
-                    line_width = st.slider("Line Width for Data Plot", min_value=0, max_value=5, value=1)
-
-                # Fit the Gaussians and plot the result
+                # Once customization is done, fit the Gaussians and plot the result
                 fig, ax = plt.subplots()
                 ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0, linewidth=line_width)  # Data as line
 
@@ -145,6 +167,5 @@ def upload_and_plot():
                     file_name="customized_gaussian_plot.png",
                     mime="image/png"
                 )
-
 
 
