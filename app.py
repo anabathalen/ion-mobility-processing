@@ -7,9 +7,9 @@ def reset_page():
     if st.session_state["current_page"] != st.session_state.get("page"):
         st.session_state.clear()
         st.session_state["current_page"] = st.session_state.get("page")
-        st.experimental_rerun()
+        st.rerun()  # Using st.rerun() instead of st.experimental_rerun()
 
-# Sidebar with navigation
+# Sidebar for navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Fit Gaussians to Data", "Calibrate"])
 
@@ -31,3 +31,4 @@ elif page == "Fit Gaussians to Data":
 elif page == "Calibrate":
     st.title("Calibrate")
     import calibrate  # Your specific tool import
+
