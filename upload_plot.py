@@ -30,80 +30,95 @@ def upload_and_plot():
             ax.set_title("Data")
             ax.set_xlabel("X")
             ax.set_ylabel("Y")
+            
+            # Variable to store the clicked peaks
+            peaks = []
+
+            # Function to capture mouse clicks on the plot
+            def onpick(event):
+                # Get the x and y data from the click event
+                mouse_x = event.artist.get_xdata()[event.ind][0]
+                mouse_y = event.artist.get_ydata()[event.ind][0]
+                
+                # Add the clicked peak to the peaks list (avoiding duplicates)
+                if (mouse_x, mouse_y) not in peaks:
+                    peaks.append((mouse_x, mouse_y))
+                    st.write(f"Peak selected at x={mouse_x:.2f}, y={mouse_y:.2f}")
+                    
+                    # Highlight the selected peak
+                    ax.plot(mouse_x, mouse_y, 'ro')  # Red dot for peak
+                    ax.set_title("Data with Selected Peaks")
+                    ax.figure.canvas.draw()
+            
+            # Connect the pick event to the plot
+            fig.canvas.mpl_connect('pick_event', onpick)
+
+            # Enable picking on the data points
+            ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue', picker=True)
             st.pyplot(fig)
 
-            # Identify local maxima using scipy.signal.find_peaks
-            peaks, _ = find_peaks(df['y'], height=0)  # Identify all local maxima
-            
-            # If peaks are found, display them
+            # If the user has selected peaks, let them fit Gaussians
             if len(peaks) > 0:
-                st.write(f"Local maxima found at indices: {peaks}")
-                st.write(f"X-values at maxima: {df['x'].iloc[peaks]}")
-                st.write(f"Y-values at maxima: {df['y'].iloc[peaks]}")
-            else:
-                st.write("No local maxima found.")
-
-            # Ask the user how many Gaussians they want to fit
-            num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=5, value=1)
-
-            # Ask for initial guesses for the Gaussian means (maxima)
-            peaks = []
-            for i in range(num_gaussians):
-                peak_guess = st.number_input(f"Enter the initial guess for the {i+1}th peak (mean of Gaussian {i+1}):", value=float(df['x'].median()))
-                peaks.append(peak_guess)
-
-            # Fit the Gaussians
-            if st.button("Fit Gaussians"):
-                # Create the x values for fitting
-                x_data = df['x']
-                y_data = df['y']
-
-                # Prepare the initial parameters for curve fitting
-                initial_guess = []
-                for peak in peaks:
-                    # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
-                    initial_guess += [max(y_data), peak, 1]
-
-                # Create an array of weights based on the local maxima
-                weights = np.ones_like(y_data)  # Default weight is 1 for all points
-                weights[peaks] = 10  # Increase the weight for points at local maxima
+                st.write(f"Number of peaks selected: {len(peaks)}")
+                # Ask the user how many Gaussians they want to fit
+                num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=5, value=1)
 
                 # Fit the Gaussians
-                def multi_gaussian(x, *params):
-                    result = np.zeros_like(x)
+                if st.button("Fit Gaussians"):
+                    # Create the x values for fitting
+                    x_data = df['x']
+                    y_data = df['y']
+
+                    # Prepare the initial parameters for curve fitting
+                    initial_guess = []
+                    for peak in peaks:
+                        # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
+                        initial_guess += [max(y_data), peak[0], 1]
+
+                    # Create an array of weights based on the user-selected peaks
+                    weights = np.ones_like(y_data)  # Default weight is 1 for all points
+                    for peak in peaks:
+                        # Get the index of the peak closest to the selected x value
+                        peak_idx = np.abs(x_data - peak[0]).argmin()
+                        weights[peak_idx] = 10  # Increase the weight for selected peaks
+
+                    # Fit the Gaussians
+                    def multi_gaussian(x, *params):
+                        result = np.zeros_like(x)
+                        for i in range(num_gaussians):
+                            amp, mean, stddev = params[3*i:3*(i+1)]
+                            result += gaussian(x, amp, mean, stddev)
+                        return result
+
+                    # Use curve fitting to find the best parameters with weighted least squares
+                    popt, _ = curve_fit(multi_gaussian, x_data, y_data, p0=initial_guess, sigma=weights, absolute_sigma=True)
+
+                    # Plot the data with the fitted Gaussians
+                    st.subheader("Fitted Gaussians with User-Selected Peaks")
+                    fig, ax = plt.subplots()
+                    ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue')
+
+                    # Plot each Gaussian
                     for i in range(num_gaussians):
-                        amp, mean, stddev = params[3*i:3*(i+1)]
-                        result += gaussian(x, amp, mean, stddev)
-                    return result
+                        amp, mean, stddev = popt[3*i:3*(i+1)]
+                        gaussian_fit = gaussian(x_data, amp, mean, stddev)
+                        ax.plot(x_data, gaussian_fit, label=f'Gaussian {i+1}', linestyle='--')
 
-                # Use curve fitting to find the best parameters with weighted least squares
-                popt, _ = curve_fit(multi_gaussian, x_data, y_data, p0=initial_guess, sigma=weights, absolute_sigma=True)
+                    ax.set_title("Gaussian Fit to Data")
+                    ax.set_xlabel("X")
+                    ax.set_ylabel("Y")
+                    ax.legend()
+                    st.pyplot(fig)
 
-                # Plot the data with the fitted Gaussians
-                st.subheader("Fitted Gaussians with Weighted Fitting")
-                fig, ax = plt.subplots()
-                ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue')
-
-                # Plot each Gaussian
-                for i in range(num_gaussians):
-                    amp, mean, stddev = popt[3*i:3*(i+1)]
-                    gaussian_fit = gaussian(x_data, amp, mean, stddev)
-                    ax.plot(x_data, gaussian_fit, label=f'Gaussian {i+1}', linestyle='--')
-
-                ax.set_title("Gaussian Fit to Data")
-                ax.set_xlabel("X")
-                ax.set_ylabel("Y")
-                ax.legend()
-                st.pyplot(fig)
-
-                # Display fitted parameters (Amplitude, Mean, Standard Deviation for each Gaussian)
-                st.write("Fitted Gaussian Parameters:")
-                for i in range(num_gaussians):
-                    amp, mean, stddev = popt[3*i:3*(i+1)]
-                    st.write(f"Gaussian {i+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
+                    # Display fitted parameters (Amplitude, Mean, Standard Deviation for each Gaussian)
+                    st.write("Fitted Gaussian Parameters:")
+                    for i in range(num_gaussians):
+                        amp, mean, stddev = popt[3*i:3*(i+1)]
+                        st.write(f"Gaussian {i+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
 
 
 
