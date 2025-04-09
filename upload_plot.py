@@ -52,9 +52,9 @@ def upload_and_plot():
                 return result
 
             # Customization options for the plot
-            dpi = st.slider("Select DPI", min_value=50, max_value=300, value=150)
-            font_size = st.slider("Font Size", min_value=8, max_value=20, value=12)
-            fig_size = st.slider("Figure Size (inches)", min_value=5, max_value=10, value=8)
+            dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
+            font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
+            fig_size = st.slider("Figure Size (inches)", min_value=2, max_value=12, value=4)
             x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
             color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
 
