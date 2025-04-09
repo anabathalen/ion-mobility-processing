@@ -59,7 +59,7 @@ def upload_and_plot():
             color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
 
             # Line width for the data plot
-            line_width = st.slider("Line Width for Data Plot", min_value=0.1, max_value=5, value=1)
+            line_width = st.slider("Line Width for Data Plot", min_value=0, max_value=5, value=1)
 
             # Fit the Gaussians and plot the result
             fig, ax = plt.subplots()
