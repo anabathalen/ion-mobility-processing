@@ -93,9 +93,9 @@ def upload_and_plot():
                         popt, _ = curve_fit(multi_gaussian, x_local, y_local, p0=local_guess)
                     except Exception as e:
                         st.error(f"Fitting failed for peak {peak:.2f}: {e}")
-                        continue
+                        continue  # Skip this peak if fitting fails
 
-                    # Plot the fitted Gaussian
+                    # Plot the fitted Gaussian if fitting was successful
                     for i in range(num_gaussians):
                         amp, mean, stddev = popt[3*i:3*(i+1)]
                         gaussian_fit = gaussian(x_local, amp, mean, stddev)
@@ -111,12 +111,17 @@ def upload_and_plot():
                 st.write("Fitted Gaussian Parameters:")
                 for i, peak in enumerate(peaks):
                     st.write(f"Peak {i+1} (initial guess: {peak}):")
-                    for j in range(num_gaussians):
-                        amp, mean, stddev = popt[3*j:3*(j+1)]
-                        st.write(f"  Gaussian {j+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
+                    # Only access popt if the fitting was successful
+                    if 'popt' in locals():
+                        for j in range(num_gaussians):
+                            amp, mean, stddev = popt[3*j:3*(j+1)]
+                            st.write(f"  Gaussian {j+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
+                    else:
+                        st.write(f"  Gaussian fitting failed for peak {peak:.2f}")
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
 
 
 
