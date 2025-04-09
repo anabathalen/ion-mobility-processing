@@ -33,7 +33,7 @@ def upload_and_plot():
                 ax.annotate(df['x'][i], (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
 
             ax.set_xlabel("Drift Time (Bins)")
-            ax.tick_params(axis='y', labelleft=False)  # Remove y-axis ticks/labels
+            ax.tick_params(axis='y', labelleft=False, left=False, right=False)  # Remove y-axis ticks/labels
             ax.set_ylabel("")  # Remove y-axis label
             st.pyplot(fig)
 
@@ -113,7 +113,7 @@ def upload_and_plot():
 
                 # Final plot aesthetics
                 ax.set_xlabel("Drift Time (Bins)")  # X-axis label
-                ax.tick_params(axis='y', labelleft=False)  # Remove y-axis ticks/labels
+                ax.tick_params(axis='y', labelleft=False, left=False, right=False)  # Remove y-axis ticks/labels
                 ax.set_ylabel("")  # Remove y-axis label
                 ax.legend()
                 st.pyplot(fig)
@@ -134,8 +134,9 @@ def upload_and_plot():
                     ax.set_xlabel(x_label)
                     fig.savefig("gaussian_fit_plot.png", dpi=dpi)
                     st.success("Figure saved as 'gaussian_fit_plot.png'")
-                
+
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
 
 
