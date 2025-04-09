@@ -1,21 +1,23 @@
 import streamlit as st
 
-# Function to handle checkbox logic
-def handle_checkbox():
-    # Create a checkbox and store its state
-    checkbox_state = st.checkbox("Try me")
+# Function to handle file upload and display content
+def handle_file_upload():
+    # Allow user to upload a text file
+    uploaded_file = st.file_uploader("Upload a text file", type="txt")
     
-    # Based on checkbox state, show the appropriate message
-    if checkbox_state:
-        st.write("Working")
-    else:
-        st.write("Please try me!")
+    if uploaded_file is not None:
+        # Read the contents of the uploaded file
+        file_content = uploaded_file.read().decode("utf-8")
+        
+        # Display the content of the file
+        st.write("File content:")
+        st.text(file_content)
 
 # Main app code
-st.title("Simple Streamlit App")
+st.title("Text File Upload Example")
 
-# Call the checkbox handler function directly
-handle_checkbox()
+# Call the function to handle the file upload
+handle_file_upload()
 
 
 
