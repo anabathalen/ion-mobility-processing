@@ -24,12 +24,12 @@ def upload_and_plot():
         
         # Check if the DataFrame contains 'x' and 'y' columns
         if 'x' in df.columns and 'y' in df.columns:
-            # Plot the raw data
+            # Plot the raw data as a line
             st.subheader("Raw Data Plot")
             fig, ax = plt.subplots()
-            ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Plot data as line
+            ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Data as line
             
-            # Label each point with its x-value
+            # Label each point with its x-value (optional)
             for i, txt in enumerate(df['y']):
                 ax.annotate(df['x'][i], (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
 
@@ -69,7 +69,7 @@ def upload_and_plot():
 
                 # Prepare to store the fitted results
                 fig, ax = plt.subplots()
-                ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Plot data as line
+                ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Data as line
 
                 # Get a color palette for shading the Gaussians
                 colors = sns.color_palette("Set1", n_colors=num_gaussians)
@@ -151,7 +151,4 @@ def upload_and_plot():
 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
-
-
-
 
