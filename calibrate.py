@@ -70,12 +70,17 @@ and each file should contain a 'charge state'. The files should be in the format
 uploaded_zip = st.file_uploader("Upload ZIP File", type=["zip"])
 
 if uploaded_zip:
-    # Show the uploaded ZIP file name
+    # Show the uploaded ZIP file name immediately
     st.write(f"Uploaded file: {uploaded_zip.name}")
 
     # Get the folder names after extraction
     folder_names, tmpdirname = process_uploaded_files(uploaded_zip)
     
+    # Immediately show a list of the calibrant folders
+    st.write(f"### Found the following calibrant folders in the ZIP file:")
+    st.write(folder_names)
+    
+    # Iterate over each protein folder and display results
     for protein_name in folder_names:
         st.write(f"### Processing Folder: {protein_name}")
 
@@ -142,4 +147,3 @@ if uploaded_zip:
                     st.write(f"You accepted the fit for {filename}")
                 if decline:
                     st.write(f"You declined the fit for {filename}")
-
