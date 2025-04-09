@@ -2,7 +2,7 @@ import streamlit as st
 
 # Sidebar with navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Calibrate (IMSCal)", "Fit Gaussians to Data"])
+page = st.sidebar.radio("Go to", ["Home", "Fit Gaussians to Data"])
 
 # Home Page
 if page == "Home":
@@ -14,9 +14,4 @@ elif page == "Fit Gaussians to Data":
     st.title("Fit Gaussians to Data")
     
     import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
-    
-# Upload CSV Page (handles the file upload)
-elif page == "Calibrate (IMSCal)":
-    st.title("Calibrate (IMSCal)")
-    
-    import calibrate
+    upload_plot.upload_and_plot()
