@@ -38,15 +38,6 @@ def upload_and_plot():
                     peak_guess = st.number_input(f"Enter the initial guess for the {i+1}th peak (mean of Gaussian {i+1}):", value=float(df['x'].median()))
                     peaks.append(peak_guess)
 
-                # Only show customization options if Gaussian parameters have been input
-                with st.expander("Plot Customization Options", expanded=True):
-                    dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
-                    font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
-                    fig_size = st.slider("Figure Size (inches)", min_value=2, max_value=15, value=4)
-                    x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
-                    color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
-                    line_width = st.slider("Line Width for Data Plot", min_value=0, max_value=5, value=1)
-                
                 # Create the x values for fitting
                 x_data = df['x']
                 y_data = df['y']
@@ -64,7 +55,22 @@ def upload_and_plot():
                         amp, mean, stddev = params[3*i:3*(i+1)]
                         result += gaussian(x, amp, mean, stddev)
                     return result
-                
+
+                # Re-render the customization options after Gaussian parameters are input
+                with st.expander("Plot Customization Options", expanded=True):
+                    # First, figure-related customization (size, DPI)
+                    st.header("Figure Customization")
+                    fig_width = st.slider("Figure Width (inches)", min_value=2, max_value=15, value=8)
+                    fig_height = st.slider("Figure Height (inches)", min_value=2, max_value=15, value=6)
+                    dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
+
+                    # Then, aesthetic-related customization (font, color, etc.)
+                    st.header("Aesthetic Customization")
+                    font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
+                    x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
+                    color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
+                    line_width = st.slider("Line Width for Data Plot", min_value=0, max_value=5, value=1)
+
                 # Fit the Gaussians and plot the result
                 fig, ax = plt.subplots()
                 ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0, linewidth=line_width)  # Data as line
@@ -122,7 +128,7 @@ def upload_and_plot():
                 ax.legend(fontsize=font_size, frameon=False)
 
                 # Adjust figure size
-                fig.set_size_inches(fig_size, fig_size)
+                fig.set_size_inches(fig_width, fig_height)
                 plt.rcParams.update({'font.size': font_size})  # Update font size globally
 
                 # Show the plot to the user
@@ -139,7 +145,6 @@ def upload_and_plot():
                     file_name="customized_gaussian_plot.png",
                     mime="image/png"
                 )
-
 
 
 
