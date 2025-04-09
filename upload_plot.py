@@ -30,7 +30,7 @@ def upload_and_plot():
             
             # Label each point with its row number
             for i, txt in enumerate(df['y']):
-                ax.annotate(f"df['y'][i]", (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
+                ax.annotate(df['y'][i], (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
                 
             ax.set_title("Data")
             ax.set_xlabel("X")
