@@ -12,6 +12,7 @@ if page == "Home":
 # Upload CSV Page (handles the file upload)
 elif page == "Fit Gaussians to Data":
     st.title("Fit Gaussians to Data")
+    st.write("Upload your x, y CSV file to generate a plot.")
     
     import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
     upload_plot.upload_and_plot()
