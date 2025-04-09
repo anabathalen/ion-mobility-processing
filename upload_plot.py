@@ -71,7 +71,7 @@ def upload_and_plot():
                 ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='black', alpha=1.0)
 
                 # Get a color palette for shading the Gaussians
-                colors = sns.color_palette("Paired", n_colors=num_gaussians)
+                colors = sns.color_palette("Set1", n_colors=num_gaussians)
 
                 # Loop through each peak guess to perform the fitting and plot the results
                 for i, peak in enumerate(peaks):
