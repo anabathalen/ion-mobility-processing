@@ -6,20 +6,17 @@ def handle_file_upload():
     uploaded_file = st.file_uploader("Upload a text file", type="txt")
     
     if uploaded_file is not None:
-        # Read the contents of the uploaded file
-        file_content = uploaded_file.read().decode("utf-8")
-        
-        # Display the content of the file
-        st.write("File content:")
-        st.text(file_content)
+        # Try to read the contents of the uploaded file
+        try:
+            file_content = uploaded_file.read().decode("utf-8")
+            # Display the content of the file
+            st.write("File content:")
+            st.text(file_content)
+        except Exception as e:
+            st.error(f"Error reading the file: {e}")
 
 # Main app code
 st.title("Text File Upload Example")
 
 # Call the function to handle the file upload
 handle_file_upload()
-
-
-
-
-
