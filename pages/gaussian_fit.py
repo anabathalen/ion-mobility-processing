@@ -20,50 +20,60 @@ def multi_gaussian(x, *params):
     return y
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file)
-    st.write("Preview of data:")
-    st.dataframe(df.head())
-
     try:
-        x = df.iloc[:, 0].values
-        y = df.iloc[:, 1].values
+        # Read the file
+        df = pd.read_csv(uploaded_file)
+        st.write("Preview of the uploaded data:")
+        st.dataframe(df.head())  # Show the first few rows of the uploaded data
 
-        n_gaussians = st.slider("Number of Gaussians to fit", 1, 5, 1)
+        # Ensure we have 'x' and 'y' columns
+        if 'x' in df.columns and 'y' in df.columns:
+            x = df['x'].values
+            y = df['y'].values
 
-        # Initial guess: equally spaced means, fixed width, guess amps
-        amps = [max(y) / n_gaussians] * n_gaussians
-        cens = np.linspace(min(x), max(x), n_gaussians)
-        wids = [1.0] * n_gaussians
+            st.write(f"Total points: {len(x)}")  # Debugging line to show the number of points
 
-        initial_guess = []
-        for a, c, w in zip(amps, cens, wids):
-            initial_guess += [a, c, w]
+            # Gaussian fitting
+            n_gaussians = st.slider("Number of Gaussians to fit", 1, 5, 3)
 
-        popt, _ = curve_fit(multi_gaussian, x, y, p0=initial_guess)
+            # Initial guess: equally spaced means, fixed width, guess amps
+            amps = [max(y) / n_gaussians] * n_gaussians
+            cens = np.linspace(min(x), max(x), n_gaussians)
+            wids = [1.0] * n_gaussians
 
-        # Plot
-        fig, ax = plt.subplots()
-        ax.plot(x, y, 'b.', label="Data")
-        ax.plot(x, multi_gaussian(x, *popt), 'r-', label="Total Fit")
+            initial_guess = []
+            for a, c, w in zip(amps, cens, wids):
+                initial_guess += [a, c, w]
 
-        # Plot individual Gaussians
-        for i in range(n_gaussians):
-            amp = popt[i*3]
-            cen = popt[i*3 + 1]
-            wid = popt[i*3 + 2]
-            g = amp * np.exp(-(x - cen)**2 / (2 * wid**2))
-            ax.plot(x, g, '--', label=f'Gaussian {i+1}')
+            # Perform the curve fitting
+            popt, _ = curve_fit(multi_gaussian, x, y, p0=initial_guess)
 
-        ax.legend()
-        st.pyplot(fig)
+            # Plot the result
+            fig, ax = plt.subplots()
+            ax.plot(x, y, 'b.', label="Data")
+            ax.plot(x, multi_gaussian(x, *popt), 'r-', label="Total Fit")
 
-        # Output parameters
-        st.subheader("Fitted Parameters")
-        for i in range(n_gaussians):
-            st.write(f"Gaussian {i+1}:")
-            st.write(f"  Amplitude = {popt[i*3]:.3f}")
-            st.write(f"  Center = {popt[i*3+1]:.3f}")
-            st.write(f"  Width = {popt[i*3+2]:.3f}")
+            # Plot individual Gaussians
+            for i in range(n_gaussians):
+                amp = popt[i*3]
+                cen = popt[i*3 + 1]
+                wid = popt[i*3 + 2]
+                g = amp * np.exp(-(x - cen)**2 / (2 * wid**2))
+                ax.plot(x, g, '--', label=f'Gaussian {i+1}')
 
+            ax.legend()
+            st.pyplot(fig)
+
+            # Display the fitted parameters
+            st.subheader("Fitted Parameters")
+            for i in range(n_gaussians):
+                st.write(f"Gaussian {i+1}:")
+                st.write(f"  Amplitude = {popt[i*3]:.3f}")
+                st.write(f"  Center = {popt[i*3+1]:.3f}")
+                st.write(f"  Width = {popt[i*3+2]:.3f}")
+        else:
+            st.error("The uploaded CSV must contain 'x' and 'y' columns.")
+    
     except Exception as e:
-        st.error(f"Something went wrong with fitting: {e}")
+        st.error(f"An error occurred: {e}")
+
