@@ -57,7 +57,7 @@ def upload_and_plot():
                     # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
                     initial_guess += [max(y_data), peak, 1]
 
-                # Fitting function to include only a local region (10 points before and after the central x)
+                # Fitting function to include only a local region (x-10 to x+10)
                 def multi_gaussian(x, *params):
                     result = np.zeros_like(x)
                     for i in range(num_gaussians):
@@ -71,14 +71,19 @@ def upload_and_plot():
 
                 # Loop through each peak guess to perform the fitting and plot the results
                 for peak in peaks:
-                    # Find the index of the closest x-value to the current peak
-                    peak_idx = np.abs(x_data - peak).argmin()
+                    # Define the local region from peak - 10 to peak + 10
+                    x_range_min = peak - 10
+                    x_range_max = peak + 10
 
-                    # Get a local region around the peak (10 points before and after)
-                    start_idx = max(0, peak_idx - 10)
-                    end_idx = min(len(x_data), peak_idx + 10)
-                    x_local = x_data[start_idx:end_idx]
-                    y_local = y_data[start_idx:end_idx]
+                    # Get the subset of data within the x-range [peak-10, peak+10]
+                    mask = (x_data >= x_range_min) & (x_data <= x_range_max)
+                    x_local = x_data[mask]
+                    y_local = y_data[mask]
+
+                    # Ensure we have enough points for fitting
+                    if len(x_local) < 3:
+                        st.warning(f"Not enough data points around peak {peak:.2f} for fitting. Skipping this peak.")
+                        continue  # Skip this peak if there's not enough data
 
                     # Initial guess for this local region
                     local_guess = [max(y_local), peak, 1]  # Amplitude, Mean (the peak), Stddev
@@ -87,8 +92,8 @@ def upload_and_plot():
                     try:
                         popt, _ = curve_fit(multi_gaussian, x_local, y_local, p0=local_guess)
                     except Exception as e:
-                        st.error(f"Fitting failed: {e}")
-                        return
+                        st.error(f"Fitting failed for peak {peak:.2f}: {e}")
+                        continue
 
                     # Plot the fitted Gaussian
                     for i in range(num_gaussians):
