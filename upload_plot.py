@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import seaborn as sns
-import os
+import io
 
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
@@ -117,42 +117,31 @@ def upload_and_plot():
                 ax.tick_params(axis='y', labelleft=False, left=False, right=False)  # Remove y-axis ticks/labels
                 ax.set_ylabel("")  # Remove y-axis label
                 ax.legend()
+
+                # Collect user inputs for figure adjustments
+                font_size = st.number_input("Font size for labels and title", min_value=8, max_value=20, value=12)
+                fig_size = st.number_input("Figure size (inches)", min_value=5, max_value=10, value=8)
+                dpi = st.number_input("Figure resolution (DPI)", min_value=50, max_value=300, value=150)
+                x_label = st.text_input("Enter the desired X-axis label:", "Drift Time (Bins)")
+
+                # Apply user adjustments to the plot
+                fig.set_size_inches(fig_size, fig_size)
+                plt.rcParams.update({'font.size': font_size})  # Set font size
+                ax.set_xlabel(x_label)
+
+                # Save the plot to a BytesIO object for immediate download
+                buf = io.BytesIO()
+                fig.savefig(buf, format="png", dpi=dpi)
+                buf.seek(0)
+
+                # Provide the figure as a downloadable file
+                st.download_button(
+                    label="Download the customized plot",
+                    data=buf,
+                    file_name="customized_gaussian_fit_plot.png",
+                    mime="image/png"
+                )
+                
+                # Show the plot to the user
                 st.pyplot(fig)
-
-                # Ask the user if they want to save the plot as a figure
-                save_figure = st.checkbox("Save figure as a file?")
-
-                if save_figure:
-                    # Prompt for figure settings
-                    font_size = st.number_input("Font size for labels and title", min_value=8, max_value=20, value=12)
-                    fig_size = st.number_input("Figure size (inches)", min_value=5, max_value=10, value=8)
-                    dpi = st.number_input("Figure resolution (DPI)", min_value=50, max_value=300, value=150)
-                    x_label = st.text_input("Enter the desired X-axis label:", "Drift Time (Bins)")
-
-                    # Update figure and labels
-                    fig.set_size_inches(fig_size, fig_size)
-                    plt.rcParams.update({'font.size': font_size})  # Set font size
-                    ax.set_xlabel(x_label)
-                    
-                    # Create the file path to save the figure
-                    save_path = "gaussian_fit_plot.png"
-                    fig.savefig(save_path, format="png", dpi=dpi)
-
-                    # Let the user know the file is saved and provide a download link
-                    st.success(f"Figure saved successfully as '{save_path}'!")
-
-                    # Provide the figure as a downloadable file
-                    with open(save_path, "rb") as file:
-                        st.download_button(
-                            label="Download figure",
-                            data=file,
-                            file_name="gaussian_fit_plot.png",
-                            mime="image/png"
-                        )
-
-                    # Optionally remove the saved file after download to keep the environment clean
-                    os.remove(save_path)
-
-        else:
-            st.error("CSV must contain 'x' and 'y' columns.")
 
