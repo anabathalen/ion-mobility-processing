@@ -1,16 +1,21 @@
 import streamlit as st
 
-# Function to clear session state
-def reset_session_state():
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
+# Function to reset the page when switching
+def reset_page():
+    if "current_page" not in st.session_state:
+        st.session_state["current_page"] = None
+    if st.session_state["current_page"] != st.session_state.get("page"):
+        st.session_state.clear()
+        st.session_state["current_page"] = st.session_state.get("page")
+        st.experimental_rerun()
 
-# Sidebar for navigation
+# Sidebar with navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Fit Gaussians to Data", "Calibrate"])
 
-# Reset session state when a new page is selected
-reset_session_state()
+# Call reset_page when page changes
+st.session_state["page"] = page
+reset_page()
 
 # Home Page
 if page == "Home":
