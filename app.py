@@ -21,4 +21,3 @@ elif page == "Calibrate (IMSCal)":
     st.title("Calibrate (IMSCal)")
     
     import calibrate
-    upload_plot.upload_and_plot()
