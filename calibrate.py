@@ -6,39 +6,48 @@ import tempfile
 # Function to handle the ZIP file upload and extract folder names
 def extract_zip_and_list_folders(uploaded_zip):
     # Create a temporary directory to extract the ZIP contents
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        # Extract the ZIP file to the temporary directory
-        with zipfile.ZipFile(uploaded_zip, 'r') as zip_ref:
-            zip_ref.extractall(tmpdirname)
-
-        # List the folder names inside the extracted ZIP file
-        folder_names = [folder for folder in os.listdir(tmpdirname) if os.path.isdir(os.path.join(tmpdirname, folder))]
-
-        return folder_names
+    try:
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            # Extract the ZIP file to the temporary directory
+            with zipfile.ZipFile(uploaded_zip, 'r') as zip_ref:
+                zip_ref.extractall(tmpdirname)
+                
+            # List the folder names inside the extracted ZIP file
+            folder_names = [folder for folder in os.listdir(tmpdirname) if os.path.isdir(os.path.join(tmpdirname, folder))]
+            
+            if folder_names:
+                return folder_names
+            else:
+                return None
+    except Exception as e:
+        return f"Error: {e}"
 
 # Streamlit interface
-st.write("### Upload a ZIP File and List Folder Names")
-st.write("""
-This tool allows you to upload a ZIP file. After uploading, the names of the folders inside the ZIP file will be displayed.
-""")
+st.title("ZIP File Folder Extractor")
+st.write("Upload a ZIP file, and it will show the names of any folders inside it.")
 
 # File uploader widget
 uploaded_zip = st.file_uploader("Upload ZIP File", type=["zip"])
 
 if uploaded_zip:
-    # Show the uploaded ZIP file name immediately
     st.write(f"Uploaded file: {uploaded_zip.name}")
 
-    # Execute the function to process the ZIP and list folder names
+    # Step 1: Extract and process the ZIP file
     folder_names = extract_zip_and_list_folders(uploaded_zip)
 
-    # Display the folder names
-    if folder_names:
-        st.write("### Found the following folders inside the ZIP file:")
-        for folder in folder_names:
-            st.write(folder)
-    else:
-        st.write("No folders were found in the ZIP file.")
+    # Step 2: Check if folders were found or if there was an error
+    if isinstance(folder_names, list):  # If folder names were successfully retrieved
+        if folder_names:
+            st.write("### Found the following folders inside the ZIP file:")
+            for folder in folder_names:
+                st.write(f"- {folder}")
+        else:
+            st.write("No folders were found inside the ZIP file.")
+    else:  # If there was an error during extraction
+        st.write(folder_names)  # Display the error message
+else:
+    st.write("Please upload a ZIP file to get started.")
+
 
 
 
