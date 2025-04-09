@@ -108,7 +108,7 @@ def upload_and_plot():
                     if fix_peak_width and len(initial_guess) >= 6:
                         # Ensure each subsequent Gaussian's width is no more than 10% larger than the previous one
                         for i in range(1, len(initial_guess) // 3):
-                            initial_guess[3*i + 2] = initial_guess[3*(i-1) + 2] * 1.10  # Fix stddev width
+                            initial_guess[3*i + 2] = initial_guess[3*(i-1) + 2] * 1  # Fix stddev width
 
                     # Fitting function to include only a local region (x-10 to x+10)
                     def multi_gaussian(x, *params):
