@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
 
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
@@ -31,6 +32,17 @@ def upload_and_plot():
             ax.set_ylabel("Y")
             st.pyplot(fig)
 
+            # Identify local maxima using scipy.signal.find_peaks
+            peaks, _ = find_peaks(df['y'], height=0)  # Identify all local maxima
+            
+            # If peaks are found, display them
+            if len(peaks) > 0:
+                st.write(f"Local maxima found at indices: {peaks}")
+                st.write(f"X-values at maxima: {df['x'].iloc[peaks]}")
+                st.write(f"Y-values at maxima: {df['y'].iloc[peaks]}")
+            else:
+                st.write("No local maxima found.")
+
             # Ask the user how many Gaussians they want to fit
             num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=5, value=1)
 
@@ -52,6 +64,10 @@ def upload_and_plot():
                     # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
                     initial_guess += [max(y_data), peak, 1]
 
+                # Create an array of weights based on the local maxima
+                weights = np.ones_like(y_data)  # Default weight is 1 for all points
+                weights[peaks] = 10  # Increase the weight for points at local maxima
+
                 # Fit the Gaussians
                 def multi_gaussian(x, *params):
                     result = np.zeros_like(x)
@@ -60,11 +76,11 @@ def upload_and_plot():
                         result += gaussian(x, amp, mean, stddev)
                     return result
 
-                # Use curve fitting to find the best parameters
-                popt, _ = curve_fit(multi_gaussian, x_data, y_data, p0=initial_guess)
+                # Use curve fitting to find the best parameters with weighted least squares
+                popt, _ = curve_fit(multi_gaussian, x_data, y_data, p0=initial_guess, sigma=weights, absolute_sigma=True)
 
                 # Plot the data with the fitted Gaussians
-                st.subheader("Fitted Gaussians")
+                st.subheader("Fitted Gaussians with Weighted Fitting")
                 fig, ax = plt.subplots()
                 ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue')
 
@@ -88,5 +104,6 @@ def upload_and_plot():
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
 
 
