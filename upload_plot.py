@@ -56,7 +56,7 @@ def upload_and_plot():
                 initial_guess = []
                 for peak in peaks:
                     # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
-                    initial_guess += [max(y_data), peak, 1]
+                    initial_guess += [max(y_data), peak, 100]
 
                 # Fitting function to include only a local region (x-10 to x+10)
                 def multi_gaussian(x, *params):
