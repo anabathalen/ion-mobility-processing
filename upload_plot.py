@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import seaborn as sns
-import io
+import os
 
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
@@ -134,20 +134,25 @@ def upload_and_plot():
                     plt.rcParams.update({'font.size': font_size})  # Set font size
                     ax.set_xlabel(x_label)
                     
-                    # Create a BytesIO object to save the figure to memory
-                    buf = io.BytesIO()
-                    fig.savefig(buf, format="png", dpi=dpi)
-                    buf.seek(0)
+                    # Create the file path to save the figure
+                    save_path = "gaussian_fit_plot.png"
+                    fig.savefig(save_path, format="png", dpi=dpi)
+
+                    # Let the user know the file is saved and provide a download link
+                    st.success(f"Figure saved successfully as '{save_path}'!")
 
                     # Provide the figure as a downloadable file
-                    st.download_button(
-                        label="Download figure",
-                        data=buf,
-                        file_name="gaussian_fit_plot.png",
-                        mime="image/png"
-                    )
-                    
-                    st.success("Figure ready for download!")
+                    with open(save_path, "rb") as file:
+                        st.download_button(
+                            label="Download figure",
+                            data=file,
+                            file_name="gaussian_fit_plot.png",
+                            mime="image/png"
+                        )
+
+                    # Optionally remove the saved file after download to keep the environment clean
+                    os.remove(save_path)
 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
