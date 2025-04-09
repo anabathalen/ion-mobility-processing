@@ -1,28 +1,21 @@
 import streamlit as st
+import pandas as pd
 
-# Use Streamlit's session state to store file content
-if "file_content" not in st.session_state:
-    st.session_state["file_content"] = None
-
-# Function to handle file upload and display content
+# Function to handle file upload and display data
 def handle_file_upload():
-    uploaded_file = st.file_uploader("Upload a text file", type="txt")
+    # Allow the user to upload a CSV file
+    uploaded_file = st.file_uploader("Upload your CSV file here:", type="csv")
     
     if uploaded_file is not None:
-        try:
-            file_content = uploaded_file.read().decode("utf-8")
-            st.session_state["file_content"] = file_content  # Store in session state
-            st.write("File content:")
-            st.text(file_content)
-        except Exception as e:
-            st.error(f"Error reading the file: {e}")
-    else:
-        if st.session_state["file_content"]:
-            st.write("Previous file content:")
-            st.text(st.session_state["file_content"])
+        # Read the CSV into a pandas DataFrame
+        df = pd.read_csv(uploaded_file)
+        
+        # Show the uploaded data as a DataFrame for reference
+        st.write("Your data:")
+        st.dataframe(df)
 
 # Main app code
-st.title("Text File Upload Example")
+st.title("CSV File Upload Example")
 
 # Call the function to handle the file upload
 handle_file_upload()
