@@ -10,7 +10,7 @@ if page == "Home":
     st.subheader("←←← Navigate to the tool you need from the sidebar.")
 
 # Upload CSV Page (handles the file upload)
-elif page == "Upload CSV":
+elif page == "Upload CSV?":
     st.title("Upload CSV and Plot")
     st.write("Upload your x, y CSV file to generate a plot.")
     
