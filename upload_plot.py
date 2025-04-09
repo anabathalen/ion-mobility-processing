@@ -24,7 +24,7 @@ def upload_and_plot():
         
         # Check if the DataFrame contains 'x' and 'y' columns
         if 'x' in df.columns and 'y' in df.columns:
-            # Plot the raw data as a line
+            # Plot the raw data as a smooth line
             st.subheader("Raw Data Plot")
             fig, ax = plt.subplots()
             ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Data as line
