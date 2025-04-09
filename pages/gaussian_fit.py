@@ -4,12 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-st.title("🌋 Gaussian Fitting Tool")
-
 # Step 1: Upload CSV file
 uploaded_file = st.file_uploader("Upload CSV file with 'x' and 'y' columns", type="csv")
-
-st.write(df.head())  # Print the first few rows to check
 
 # Helper: sum of N gaussians
 def multi_gaussian(x, *params):
@@ -25,8 +21,10 @@ if uploaded_file:
     try:
         # Read the uploaded CSV file
         df = pd.read_csv(uploaded_file)
-        st.write("Preview of the uploaded data:")
-        st.dataframe(df.head())  # Show the first few rows of the uploaded data
+        
+        # Show the first few rows of the uploaded data
+        st.write("Data Preview:")
+        st.write(df.head())  # Ensure the dataframe is valid
         
         # Step 2: Ensure correct data format (x and y columns)
         if 'x' in df.columns and 'y' in df.columns:
@@ -93,6 +91,7 @@ if uploaded_file:
             st.error("The uploaded CSV must contain 'x' and 'y' columns.")
     except Exception as e:
         st.error(f"An error occurred while processing the file: {e}")
+
 
 
 
