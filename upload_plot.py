@@ -52,15 +52,18 @@ def upload_and_plot():
                 return result
 
             # Customization options for the plot
-            dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
-            font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
-            fig_size = st.slider("Figure Size (inches)", min_value=2, max_value=12, value=4)
+            dpi = st.slider("Select DPI", min_value=50, max_value=300, value=150)
+            font_size = st.slider("Font Size", min_value=8, max_value=20, value=12)
+            fig_size = st.slider("Figure Size (inches)", min_value=5, max_value=10, value=8)
             x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
             color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
 
+            # Line width for the data plot
+            line_width = st.slider("Line Width for Data Plot", min_value=1, max_value=5, value=2)
+
             # Fit the Gaussians and plot the result
             fig, ax = plt.subplots()
-            ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Data as line
+            ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0, linewidth=line_width)  # Data as line
 
             # Get the selected color palette
             colors = sns.color_palette(color_palette, n_colors=num_gaussians)
@@ -107,7 +110,12 @@ def upload_and_plot():
             ax.set_xlabel(x_label, fontsize=font_size)
             ax.tick_params(axis='y', labelleft=False, left=False, right=False)
             ax.set_ylabel("", fontsize=font_size)
-            ax.legend(fontsize=font_size)
+
+            # Update X-axis tick label font size
+            ax.tick_params(axis='x', labelsize=font_size)
+
+            # Remove grey line around the legend
+            ax.legend(fontsize=font_size, frameon=False)
 
             # Adjust figure size
             fig.set_size_inches(fig_size, fig_size)
@@ -127,5 +135,6 @@ def upload_and_plot():
                 file_name="customized_gaussian_plot.png",
                 mime="image/png"
             )
+
 
 
