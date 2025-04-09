@@ -9,12 +9,6 @@ if page == "Home":
     st.title("Welcome to the Home Page!")
     st.write("This is your main page. You can navigate to the 'Plot' or 'Upload CSV' page from the sidebar.")
 
-# Plot Page
-elif page == "Plot":
-    st.title("Plot Page")
-    st.write("Here you can plot a graph.")
-    # Optionally, you can add more content or plot options here.
-
 # Upload CSV Page
 elif page == "Upload CSV":
     st.title("Upload CSV and Plot")
