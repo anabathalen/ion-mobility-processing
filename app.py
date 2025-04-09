@@ -9,9 +9,10 @@ if page == "Home":
     st.title("Welcome to the Home Page!")
     st.write("This is your main page. You can navigate to the 'Plot' or 'Upload CSV' page from the sidebar.")
 
-# Upload CSV Page
+# Upload CSV Page (handles the file upload)
 elif page == "Upload CSV":
     st.title("Upload CSV and Plot")
     st.write("Upload your x, y CSV file to generate a plot.")
-    # This will be handled by the upload_plot.py file
-    import upload_plot  # Import the page to handle CSV upload
+    
+    import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
+    upload_plot.upload_and_plot()
