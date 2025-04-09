@@ -14,12 +14,10 @@ elif page == "Fit Gaussians to Data":
     st.title("Fit Gaussians to Data")
     
     import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
-    upload_plot.upload_and_plot()
 
 # Upload CSV Page (handles the file upload)
 elif page == "Calibrate":
     st.title("Calibrate")
     
     import calibrate  # This will bring in the CSV upload functionality from upload_plot.py
-    calibrate.handlecheckbox()
 
