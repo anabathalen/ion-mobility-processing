@@ -3,8 +3,8 @@ import zipfile
 import os
 import tempfile
 
-# Define the function to handle the ZIP file upload and extract folder names
-def process_zip_and_list_folders(uploaded_zip):
+# Function to handle the ZIP file upload and extract folder names
+def extract_zip_and_list_folders(uploaded_zip):
     # Create a temporary directory to extract the ZIP contents
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Extract the ZIP file to the temporary directory
@@ -30,7 +30,7 @@ if uploaded_zip:
     st.write(f"Uploaded file: {uploaded_zip.name}")
 
     # Execute the function to process the ZIP and list folder names
-    folder_names = process_zip_and_list_folders(uploaded_zip)
+    folder_names = extract_zip_and_list_folders(uploaded_zip)
 
     # Display the folder names
     if folder_names:
@@ -39,5 +39,6 @@ if uploaded_zip:
             st.write(folder)
     else:
         st.write("No folders were found in the ZIP file.")
+
 
 
