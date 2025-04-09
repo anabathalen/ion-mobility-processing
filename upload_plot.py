@@ -64,6 +64,9 @@ def upload_and_plot():
             ax.legend()
             st.pyplot(fig)
 
+            # Option to fix the peak width for subsequent Gaussians
+            fix_peak_width = st.checkbox("Fix peak width for subsequent Gaussians (each subsequent Gaussian's width is no more than 10% larger than the previous one)")
+
             # Ask for initial guesses for the Gaussian means (peak x-values)
             st.write("Now that the major maxima have been identified, please input the number of Gaussian peaks and their positions.")
             num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=10, value=1)
@@ -73,9 +76,6 @@ def upload_and_plot():
             for i in range(num_gaussians):
                 peak_guess = st.number_input(f"Enter the initial guess for the {i+1}th peak (mean of Gaussian {i+1}):", value=float(df['x'].median()))
                 peaks.append(peak_guess)
-
-            # Option to fix the peak width for subsequent Gaussians
-            fix_peak_width = st.checkbox("Fix peak width for subsequent Gaussians (each subsequent Gaussian's width is no more than 10% larger than the previous one)")
 
             # Once the user has entered all the Gaussian centers, allow the user to customize the plot
             with st.expander("Plot Customization Options", expanded=True):
