@@ -21,3 +21,5 @@ elif page == "Calibrate":
     st.title("Calibrate")
     
     import calibrate  # This will bring in the CSV upload functionality from upload_plot.py
+    calibrate.upload_and_plot()
+
