@@ -129,7 +129,7 @@ def upload_and_plot():
                     dpi = st.number_input("Figure resolution (DPI)", min_value=50, max_value=300, value=150)
                     x_label = st.text_input("Enter the desired X-axis label:", "Drift Time (Bins)")
 
-                    # Save the figure with the specified settings
+                    # Update figure and labels
                     fig.set_size_inches(fig_size, fig_size)
                     plt.rcParams.update({'font.size': font_size})  # Set font size
                     ax.set_xlabel(x_label)
@@ -151,4 +151,3 @@ def upload_and_plot():
 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
-
