@@ -17,23 +17,23 @@ def multi_gaussian(x, *params):
         y += amp * np.exp(-(x - cen)**2 / (2 * wid**2))
     return y
 
-if uploaded_file:
+if uploaded_file is not None:
     try:
-        # Read the uploaded CSV file
+        # Step 2: Read the uploaded CSV file into a DataFrame
         df = pd.read_csv(uploaded_file)
         
-        # Show the first few rows of the uploaded data
+        # Show the first few rows of the uploaded data to the user
         st.write("Data Preview:")
         st.write(df.head())  # Ensure the dataframe is valid
         
-        # Step 2: Ensure correct data format (x and y columns)
+        # Step 3: Ensure correct data format (x and y columns)
         if 'x' in df.columns and 'y' in df.columns:
             x = df['x'].values
             y = df['y'].values
 
             st.write(f"Data successfully loaded: {len(x)} data points.")
             
-            # Step 3: Plot y vs x
+            # Step 4: Plot y vs x
             st.write("Here is the plot of y vs x:")
             fig, ax = plt.subplots()
             ax.plot(x, y, 'b.', label="Data")
@@ -42,10 +42,10 @@ if uploaded_file:
             ax.set_title("y vs x")
             st.pyplot(fig)
 
-            # Step 4: Ask the user for number of Gaussians
+            # Step 5: Ask the user for number of Gaussians
             n_gaussians = st.slider("Number of Gaussians to fit", 1, 5, 3)
 
-            # Step 5: Ask the user for initial parameters for each Gaussian
+            # Step 6: Ask the user for initial parameters for each Gaussian
             initial_guesses = []
             for i in range(n_gaussians):
                 st.subheader(f"Gaussian {i+1} parameters")
@@ -55,7 +55,7 @@ if uploaded_file:
 
                 initial_guesses.extend([amplitude, centroid, width])
 
-            # Step 6: Fit the Gaussians
+            # Step 7: Fit the Gaussians
             if st.button("Fit Gaussians"):
                 try:
                     # Perform the curve fitting
@@ -78,7 +78,7 @@ if uploaded_file:
                     ax.legend()
                     st.pyplot(fig)
 
-                    # Step 7: Display fitted parameters
+                    # Step 8: Display fitted parameters
                     st.subheader("Fitted Parameters")
                     for i in range(n_gaussians):
                         st.write(f"Gaussian {i+1}:")
@@ -91,6 +91,9 @@ if uploaded_file:
             st.error("The uploaded CSV must contain 'x' and 'y' columns.")
     except Exception as e:
         st.error(f"An error occurred while processing the file: {e}")
+else:
+    st.info("Please upload a CSV file to begin.")
+
 
 
 
