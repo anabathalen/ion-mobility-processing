@@ -48,104 +48,138 @@ def upload_and_plot():
 
             # Annotate the major local maxima with x values
             for i, x_val in enumerate(maxima_x):
+                # Adjust the annotation position to ensure it stays within the plot
                 y_val = maxima_y.iloc[i]
-                ax.annotate(f'{x_val:.2f}', (x_val, y_val), textcoords="offset points", xytext=(0, 5), ha='center')
+                offset = 10
+                # Ensure the label doesn't go outside the plot boundaries
+                if x_val < min(df['x']) + 0.1 * (max(df['x']) - min(df['x'])):
+                    offset = -10  # Move the label slightly to the right if too close to left boundary
+                elif x_val > max(df['x']) - 0.1 * (max(df['x']) - min(df['x'])):
+                    offset = -10  # Move the label slightly to the left if too close to right boundary
+                
+                ax.annotate(f'{x_val:.2f}', (x_val, y_val), textcoords="offset points", xytext=(0, offset), ha='center')
 
+            ax.set_xlabel("Drift Time (Bins)")
+            ax.set_ylabel("Intensity")
             ax.legend()
             st.pyplot(fig)
 
-            # Now ask the user to enter the initial guesses for the Gaussian peaks
+            # Ask for initial guesses for the Gaussian means (peak x-values)
+            st.write("Now that the major maxima have been identified, please input the number of Gaussian peaks and their positions.")
             num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=10, value=1)
 
+            # Ask for the Gaussian center guesses (the means of the Gaussians)
             peaks = []
             for i in range(num_gaussians):
                 peak_guess = st.number_input(f"Enter the initial guess for the {i+1}th peak (mean of Gaussian {i+1}):", value=float(df['x'].median()))
                 peaks.append(peak_guess)
 
-            # Create the x values for fitting
-            x_data = df['x']
-            y_data = df['y']
+            # Once the user has entered all the Gaussian centers, allow the user to customize the plot
+            with st.expander("Plot Customization Options", expanded=True):
+                # First, figure-related customization (size, DPI)
+                st.header("Figure Customization")
+                fig_width = st.slider("Figure Width (inches)", min_value=2, max_value=15, value=8)
+                fig_height = st.slider("Figure Height (inches)", min_value=2, max_value=15, value=6)
+                dpi = st.slider("Select DPI", min_value=50, max_value=1000, value=300)
 
-            # Prepare the initial parameters for curve fitting
-            initial_guess = []
-            for peak in peaks:
-                # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
-                initial_guess += [max(y_data), peak, 100]
+                # Then, aesthetic-related customization (font, color, etc.)
+                st.header("Aesthetic Customization")
+                font_size = st.slider("Font Size", min_value=6, max_value=20, value=12)
+                x_label = st.text_input("Enter X-axis Label", "Drift Time (Bins)")
+                color_palette = st.selectbox("Choose a Color Palette", options=["Set1", "Set2", "Paired", "Pastel1", "Dark2"])
+                line_width = st.slider("Line Width for Data Plot", min_value=0, max_value=5, value=1)
 
-            # Fitting function to include only a local region (x-10 to x+10)
-            def multi_gaussian(x, *params):
-                result = np.zeros_like(x)
-                for i in range(num_gaussians):
-                    amp, mean, stddev = params[3*i:3*(i+1)]
-                    result += gaussian(x, amp, mean, stddev)
-                return result
+                # Allow the user to proceed once all inputs are filled
+                if st.button("Generate Plot and Fit Gaussians"):
+                    # Prepare for Gaussian fitting
+                    x_data = df['x']
+                    y_data = df['y']
 
-            def fit_with_fixed_stddev(x_data, y_data, peaks):
-                # Start by fitting the first peak
-                initial_guess = [max(y_data), peaks[0], 100]
-                try:
-                    popt, _ = curve_fit(gaussian, x_data, y_data, p0=initial_guess)
-                except Exception as e:
-                    st.warning(f"Fitting failed for the first peak: {e}")
-                    return []  # Return empty list if fitting fails for the first peak
-            
-                # Extract the fitted standard deviation for the first peak
-                stddev_first_peak = popt[2]
-            
-                # For subsequent peaks, limit the stddev to be no more than 10% larger than the previous one
-                all_params = []
-                for i, peak in enumerate(peaks):
-                    if i == 0:
-                        # Use the fitted stddev for the first peak
-                        stddev = stddev_first_peak
-                    else:
-                        # For subsequent peaks, limit the stddev to 10% larger than the previous one
-                        stddev = min(stddev_first_peak * (1 + 0.1 * i), stddev_first_peak * 1.5)  # Arbitrary upper limit of 1.5 times
-                    
-                    initial_guess = [max(y_data), peak, stddev]
-                    try:
-                        popt, _ = curve_fit(gaussian, x_data, y_data, p0=initial_guess)
-                        # Append the mean and stddev of each peak (amp is not needed here)
-                        all_params += popt[1:]  # Ensure we are getting only the "mean" and "stddev"
-                    except Exception as e:
-                        st.warning(f"Fitting failed for peak {i+1}: {e}")
-                        continue  # Skip this peak if fitting fails
-            
-                return all_params
+                    # Prepare the initial parameters for curve fitting
+                    initial_guess = []
+                    for peak in peaks:
+                        # Initial guess: amplitude (max y), mean (user input), and standard deviation (arbitrary, set to 1)
+                        initial_guess += [max(y_data), peak, 100]
 
+                    # Fitting function to include only a local region (x-10 to x+10)
+                    def multi_gaussian(x, *params):
+                        result = np.zeros_like(x)
+                        for i in range(num_gaussians):
+                            amp, mean, stddev = params[3*i:3*(i+1)]
+                            result += gaussian(x, amp, mean, stddev)
+                        return result
 
-            # Fit the Gaussians
-            fitted_params = fit_with_fixed_stddev(x_data, y_data, peaks)
+                    # Once customization is done, fit the Gaussians and plot the result
+                    fig, ax = plt.subplots()
+                    ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0, linewidth=line_width)  # Data as line
 
-            # Now plot the fit
-            fig, ax = plt.subplots()
-            ax.plot(df['x'], df['y'], label='Data', color='black', alpha=1.0, linewidth=1)  # Data as line
+                    # Get the selected color palette
+                    colors = sns.color_palette(color_palette, n_colors=num_gaussians)
 
-            # Create a high-resolution x-axis (full range) for the fit
-            x_full = np.linspace(min(x_data), max(x_data), 1000)
+                    # Create a high-resolution x-axis (full range) for the fit
+                    x_full = np.linspace(min(x_data), max(x_data), 1000)
 
-            colors = sns.color_palette("Set1", n_colors=num_gaussians)
+                    # Loop through each peak guess to perform the fitting and plot the results
+                    for i, peak in enumerate(peaks):
+                        # Define the local region from peak - 10 to peak + 10
+                        x_range_min = peak - peak*0.05
+                        x_range_max = peak + peak*0.05
 
-            # Loop through each peak guess to perform the fitting and plot the results
-            for i, peak in enumerate(peaks):
-                amp, mean, stddev = fitted_params[3*i:3*(i+1)]
-                y_fit = gaussian(x_full, amp, mean, stddev)
+                        # Get the subset of data within the x-range [peak-10, peak+10]
+                        mask = (x_data >= x_range_min) & (x_data <= x_range_max)
+                        x_local = x_data[mask]
+                        y_local = y_data[mask]
 
-                # Plot the fitted Gaussian across the full range with a transparent fill
-                ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'Gaussian {i+1} - mean: {mean:.2f}, stddev: {stddev:.2f}')
+                        # Ensure we have enough points for fitting
+                        if len(x_local) < 3:
+                            continue  # Skip this peak if there's not enough data
 
-            ax.legend()
-            st.pyplot(fig)
+                        # Initial guess for this local region
+                        local_guess = [max(y_local), peak, 1]  # Amplitude, Mean (the peak), Stddev
 
-            # Allow user to download the customized plot
-            buf = io.BytesIO()
-            fig.savefig(buf, format="png")
-            buf.seek(0)
-    
-            st.download_button(
-                label="Download Customized Plot as PNG",
-                data=buf,
-                file_name="customized_gaussian_plot.png",
-                mime="image/png"
-            )
+                        # Fit the Gaussians for this region only
+                        try:
+                            # Fit the Gaussian to the local data
+                            popt, _ = curve_fit(gaussian, x_local, y_local, p0=local_guess)
+                            
+                            # Extract parameters from the fitting result
+                            amp, mean, stddev = popt
 
+                            # Generate y values across the full x_full range to plot the Gaussian
+                            y_fit = gaussian(x_full, amp, mean, stddev)
+
+                            # Plot the fitted Gaussian across the full range with a transparent fill
+                            ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'mean = {mean:.2f}')
+                            
+                        except Exception as e:
+                            continue  # Skip this peak if fitting fails
+
+                    # Update plot aesthetics based on user settings
+                    ax.set_xlabel(x_label, fontsize=font_size)
+                    ax.tick_params(axis='y', labelleft=False, left=False, right=False)
+                    ax.set_ylabel("", fontsize=font_size)
+
+                    # Update X-axis tick label font size
+                    ax.tick_params(axis='x', labelsize=font_size)
+
+                    # Remove grey line around the legend
+                    ax.legend(fontsize=font_size, frameon=False)
+
+                    # Adjust figure size
+                    fig.set_size_inches(fig_width, fig_height)
+                    plt.rcParams.update({'font.size': font_size})  # Update font size globally
+
+                    # Show the plot to the user
+                    st.pyplot(fig)
+
+                    # Allow user to download the customized plot
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format="png", dpi=dpi)
+                    buf.seek(0)
+
+                    st.download_button(
+                        label="Download Customized Plot as PNG",
+                        data=buf,
+                        file_name="customized_gaussian_plot.png",
+                        mime="image/png"
+                    )
