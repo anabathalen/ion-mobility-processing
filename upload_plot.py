@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import seaborn as sns
 
 # Define the Gaussian function
 def gaussian(x, amp, mean, stddev):
@@ -25,7 +26,7 @@ def upload_and_plot():
             # Plot the raw data
             st.subheader("Raw Data Plot")
             fig, ax = plt.subplots()
-            ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue')
+            ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='black', alpha=1.0)
             
             # Label each point with its row number
             for i, txt in enumerate(df['y']):
@@ -67,10 +68,13 @@ def upload_and_plot():
 
                 # Prepare to store the fitted results
                 fig, ax = plt.subplots()
-                ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue')
+                ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='black', alpha=1.0)
+
+                # Get a color palette for shading the Gaussians
+                colors = sns.color_palette("Paired", num_colors=num_gaussians)
 
                 # Loop through each peak guess to perform the fitting and plot the results
-                for peak in peaks:
+                for i, peak in enumerate(peaks):
                     # Define the local region from peak - 10 to peak + 10
                     x_range_min = peak - 10
                     x_range_max = peak + 10
@@ -80,16 +84,8 @@ def upload_and_plot():
                     x_local = x_data[mask]
                     y_local = y_data[mask]
 
-                    # Print the data that is going to be used for fitting
-                    st.write(f"Fitting Gaussian around peak {peak:.2f}:")
-                    st.write(f"  Data range: {x_range_min:.2f} to {x_range_max:.2f}")
-                    st.write(f"  Local data points: {len(x_local)}")
-                    st.write(f"  Local data (x values): {x_local.tolist()}")
-                    st.write(f"  Local data (y values): {y_local.tolist()}")
-
                     # Ensure we have enough points for fitting
                     if len(x_local) < 3:
-                        st.warning(f"Not enough data points around peak {peak:.2f} for fitting. Skipping this peak.")
                         continue  # Skip this peak if there's not enough data
 
                     # Initial guess for this local region
@@ -97,42 +93,33 @@ def upload_and_plot():
 
                     # Fit the Gaussians for this region only
                     try:
-                        # Debugging the fitting process
-                        st.write(f"  Initial guess: {local_guess}")
+                        # Fit the Gaussian to the local data
                         popt, pcov = curve_fit(gaussian, x_local, y_local, p0=local_guess)
-                        st.write(f"  Fitting successful for peak {peak:.2f}!")
                         
                         # Extract parameters from the fitting result
                         amp, mean, stddev = popt
-                        st.write(f"  Fitted parameters: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
+
+                        # Generate x values across the full data range to plot the Gaussian
+                        x_full = np.linspace(min(x_data), max(x_data), 1000)
+                        y_fit = gaussian(x_full, amp, mean, stddev)
+
+                        # Plot the fitted Gaussian across the full range with a transparent fill
+                        ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'Gaussian {i+1} (mean = {mean:.2f})')
+                        
                     except Exception as e:
-                        st.error(f"Fitting failed for peak {peak:.2f}: {e}")
                         continue  # Skip this peak if fitting fails
 
-                    # Plot the fitted Gaussian if fitting was successful
-                    if 'popt' in locals():
-                        gaussian_fit = gaussian(x_local, *popt)
-                        ax.plot(x_local, gaussian_fit, label=f'Gaussian for peak {peak:.2f}', linestyle='--')
-
+                # Final plot aesthetics
                 ax.set_title("Gaussian Fit to Data (with Local Regions)")
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
                 ax.legend()
                 st.pyplot(fig)
-
-                # Display fitted parameters (Amplitude, Mean, Standard Deviation for each Gaussian)
-                st.write("Fitted Gaussian Parameters:")
-                for i, peak in enumerate(peaks):
-                    st.write(f"Peak {i+1} (initial guess: {peak}):")
-                    # Only access popt if the fitting was successful
-                    if 'popt' in locals():
-                        amp, mean, stddev = popt
-                        st.write(f"  Gaussian {i+1}: Amplitude = {amp:.2f}, Mean = {mean:.2f}, Stddev = {stddev:.2f}")
-                    else:
-                        st.write(f"  Gaussian fitting failed for peak {peak:.2f}")
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
+
 
 
 
