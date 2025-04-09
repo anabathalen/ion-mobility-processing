@@ -118,30 +118,20 @@ def upload_and_plot():
                 ax.set_ylabel("")  # Remove y-axis label
                 ax.legend()
 
-                # Collect user inputs for figure adjustments
-                font_size = st.number_input("Font size for labels and title", min_value=8, max_value=20, value=12)
-                fig_size = st.number_input("Figure size (inches)", min_value=5, max_value=10, value=8)
-                dpi = st.number_input("Figure resolution (DPI)", min_value=50, max_value=300, value=150)
-                x_label = st.text_input("Enter the desired X-axis label:", "Drift Time (Bins)")
+                # Show the plot to the user
+                st.pyplot(fig)
 
-                # Apply user adjustments to the plot
-                fig.set_size_inches(fig_size, fig_size)
-                plt.rcParams.update({'font.size': font_size})  # Set font size
-                ax.set_xlabel(x_label)
-
-                # Save the plot to a BytesIO object for immediate download
+                # Allow user to download the current plot
                 buf = io.BytesIO()
-                fig.savefig(buf, format="png", dpi=dpi)
+                fig.savefig(buf, format="png")
                 buf.seek(0)
 
                 # Provide the figure as a downloadable file
                 st.download_button(
-                    label="Download the customized plot",
+                    label="Download the plot as PNG",
                     data=buf,
-                    file_name="customized_gaussian_fit_plot.png",
+                    file_name="gaussian_fit_plot.png",
                     mime="image/png"
                 )
-                
-                # Show the plot to the user
-                st.pyplot(fig)
+
 
