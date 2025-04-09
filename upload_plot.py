@@ -21,13 +21,14 @@ def upload_and_plot():
         df = pd.read_csv(uploaded_file)
         
         # Show the uploaded data as a DataFrame for reference
-        st.write("Here is the data you uploaded:")
+        st.write("Your data:")
         st.dataframe(df)
         
         # Check if the DataFrame contains 'x' and 'y' columns
         if 'x' in df.columns and 'y' in df.columns:
             # Ask the user how many Gaussians they want to fit
-            num_gaussians = st.number_input("How many Gaussians would you like to fit to the data?", min_value=1, max_value=5, value=1)
+            st.write("This tool is for fitting the major peaks in a summed or single charge state arrival time or collision cross section distribution. This is acheived by fitting each peak individually using only the data surrounding the peaks you identify (+/- 5%). This means that it is not well suited to identifying small shoulders or very poorly resolved peaks. To use this tool, count the number of MAJOR peaks in the distribution.")
+            num_gaussians = st.number_input("How many gaussians would you like to fit to the data?", min_value=1, max_value=10, value=1)
 
             # Ask for initial guesses for the Gaussian means (peak x-values)
             peaks = []
