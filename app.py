@@ -2,7 +2,7 @@ import streamlit as st
 
 # Sidebar with navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Upload CSV"])
+page = st.sidebar.radio("Go to", ["Home", "Fit Gaussians to Data"])
 
 # Home Page
 if page == "Home":
@@ -10,9 +10,8 @@ if page == "Home":
     st.subheader("←←← Navigate to the tool you need from the sidebar.")
 
 # Upload CSV Page (handles the file upload)
-elif page == "Upload CSV":
-    st.title("Upload CSV and Plot")
-    st.write("Upload your x, y CSV file to generate a plot.")
+elif page == "Fit Gaussians to Data":
+    st.title("Fit Gaussians to Data")
     
     import upload_plot  # This will bring in the CSV upload functionality from upload_plot.py
     upload_plot.upload_and_plot()
