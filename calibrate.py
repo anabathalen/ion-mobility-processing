@@ -1,43 +1,47 @@
 import streamlit as st
+import zipfile
+import os
+from io import BytesIO
 
-# Step 1: Ask for the first calibrant name
-st.title("Calibrant Charge State File Upload")
-calibrant_name = st.text_input("Enter the name of the first calibrant:")
+def extract_zip(zip_file):
+    """Extract the contents of the uploaded zip file."""
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall("/tmp")  # Extract to temporary folder
+        return zip_ref.namelist()  # Return list of file/folder names
 
-# If a calibrant name is provided, ask to upload the charge state files
-if calibrant_name:
-    st.write(f"Processing files for calibrant: {calibrant_name}")
+def list_folders(zip_file):
+    """List only the folder names from the zip file."""
+    extracted_files = extract_zip(zip_file)
+    folders = set()
     
-    # Step 2: File uploader for multiple files (drag-and-drop)
-    charge_state_files = st.file_uploader(
-        "Upload Charge State Files for this calibrant",
-        type=["txt", "csv", "dat"],  # Assuming charge state files are of these types
-        accept_multiple_files=True
-    )
+    for file in extracted_files:
+        folder_name = os.path.dirname(file)
+        if folder_name:  # Ignore empty string (root files)
+            folders.add(folder_name)
+    
+    return sorted(folders)
 
-    if charge_state_files:
-        # Step 3: Process the uploaded charge state files
-        st.write(f"Processing {len(charge_state_files)} files...")
+# Streamlit UI
+st.title("Zip File Folder Extractor")
 
-        # (Optional) Here you would include your fitting logic:
-        # For now, we are just displaying the names of the uploaded files
-        for uploaded_file in charge_state_files:
-            st.write(f"- {uploaded_file.name}")
-        
-        # After fitting (if applicable), we could show a success message
-        st.success(f"Successfully processed the charge state files for {calibrant_name}!")
+uploaded_zip = st.file_uploader("Upload a Zip file", type=["zip"])
 
-        # Step 4: Ask if you want to upload for another calibrant
-        next_calibrant = st.radio("Do you want to upload files for another calibrant?", ["Yes", "No"])
-
-        if next_calibrant == "Yes":
-            st.text_input("Enter the name of the next calibrant:")
-        else:
-            st.write("All files have been processed.")
+if uploaded_zip is not None:
+    # Use in-memory file
+    zip_file = BytesIO(uploaded_zip.read())
+    
+    st.write("Extracting folders...")
+    
+    # Get the list of folders inside the zip
+    folders = list_folders(zip_file)
+    
+    if folders:
+        st.write("Folders inside the zip file:")
+        for folder in folders:
+            st.write(f"- {folder}")
     else:
-        st.write("Please upload the charge state files for this calibrant.")
-else:
-    st.write("Please enter a calibrant name to start.")
+        st.write("No folders found in the zip file.")
+
 
 
 
