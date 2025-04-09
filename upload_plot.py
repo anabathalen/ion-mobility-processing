@@ -26,14 +26,14 @@ def upload_and_plot():
             st.subheader("Raw Data Plot")
             fig, ax = plt.subplots()
             ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='blue')
+            
+            # Label each point with its row number
+            for i, txt in enumerate(df['y']):
+                ax.annotate(f"Row {i+1}", (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
+                
             ax.set_title("Data")
             ax.set_xlabel("X")
             ax.set_ylabel("Y")
-
-            # Add interactive hover to show x, y values
-            for i, txt in enumerate(df['y']):
-                ax.annotate(f"({df['x'][i]}, {df['y'][i]:.2f})", (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
-                
             st.pyplot(fig)
 
             # Ask the user how many Gaussians they want to fit
@@ -84,7 +84,11 @@ def upload_and_plot():
                     local_guess = [max(y_local), peak, 1]  # Amplitude, Mean (the peak), Stddev
 
                     # Fit the Gaussians for this region only
-                    popt, _ = curve_fit(multi_gaussian, x_local, y_local, p0=local_guess)
+                    try:
+                        popt, _ = curve_fit(multi_gaussian, x_local, y_local, p0=local_guess)
+                    except Exception as e:
+                        st.error(f"Fitting failed: {e}")
+                        return
 
                     # Plot the fitted Gaussian
                     for i in range(num_gaussians):
@@ -108,6 +112,7 @@ def upload_and_plot():
                 
         else:
             st.error("CSV must contain 'x' and 'y' columns.")
+
 
 
 
