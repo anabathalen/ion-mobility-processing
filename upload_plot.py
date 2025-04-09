@@ -26,12 +26,8 @@ def upload_and_plot():
             # Plot the raw data
             st.subheader("Raw Data Plot")
             fig, ax = plt.subplots()
-            ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='black', alpha=1.0)
+            ax.scatter(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Scatter plot for data
             
-            # Label each point with its row number
-            for i, txt in enumerate(df['y']):
-                ax.annotate(df['x'][i], (df['x'][i], df['y'][i]), textcoords="offset points", xytext=(0, 5), ha='center', fontsize=8)
-                
             ax.set_xlabel("Drift Time (Bins)")
             ax.tick_params(axis='y', labelleft=False)  # Remove y-axis ticks/labels
             ax.set_ylabel("")  # Remove y-axis label
@@ -68,17 +64,16 @@ def upload_and_plot():
 
                 # Prepare to store the fitted results
                 fig, ax = plt.subplots()
-                ax.plot(df['x'], df['y'], label='Data', marker='o', linestyle='-', color='black', alpha=1.0)
+                ax.scatter(df['x'], df['y'], label='Data', color='black', alpha=1.0)  # Scatter plot for data
 
                 # Get a color palette for shading the Gaussians
                 colors = sns.color_palette("Set1", n_colors=num_gaussians)
 
-                # Loop through each peak guess to perform the fitting and plot the results
-                summed_y_fit = np.zeros_like(x_data)  # Initialize the summed Gaussian
-
-                # Create a high resolution x-axis (full range) for the fit
+                # Create a high-resolution x-axis (full range) for the fit
                 x_full = np.linspace(min(x_data), max(x_data), 1000)
+                summed_y_fit = np.zeros_like(x_full)  # Initialize the summed Gaussian
 
+                # Loop through each peak guess to perform the fitting and plot the results
                 for i, peak in enumerate(peaks):
                     # Define the local region from peak - 10 to peak + 10
                     x_range_min = peak - peak*0.05
@@ -109,7 +104,7 @@ def upload_and_plot():
                         summed_y_fit += y_fit  # Sum the Gaussian fits
 
                         # Plot the fitted Gaussian across the full range with a transparent fill
-                        ax.fill_between(x_full, y_fit, color=colors[i], alpha=0.3, label=f'Gaussian {i+1} (mean = {mean:.2f})')
+                        ax.plot(x_full, y_fit, color=colors[i], label=f'Gaussian {i+1} (mean = {mean:.2f})', alpha=0.7)
                         
                     except Exception as e:
                         continue  # Skip this peak if fitting fails
