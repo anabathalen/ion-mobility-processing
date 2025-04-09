@@ -29,7 +29,7 @@ def upload_and_plot():
         if 'x' in df.columns and 'y' in df.columns:
             # Ask the user how many Gaussians they want to fit
             st.write("This tool is for fitting gaussians to the major peaks in your data. This is acheived by fitting each peak individually using only the data surrounding peak maxima (+/- 5%). This means that it is not well suited to identifying small shoulders or very poorly resolved peaks. To use this tool, count the number of MAJOR peaks in the distribution.")
-            num_gaussians = st.number_input("How many gaussians would you like to fit to the data?", min_value=1, max_value=10, value=1)
+            num_gaussians = st.number_input("How many gaussians would you like to fit to the data?", min_value=1, max_value=10, value=None)
 
             if num_gaussians is not None:
 
